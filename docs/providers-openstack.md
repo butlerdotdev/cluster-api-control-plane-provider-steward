@@ -1,12 +1,12 @@
-# Kamaji and OpenStack
+# Steward and OpenStack
 
-The Kamaji Control Plane provider was able to create an OpenStack backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create an OpenStack backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                                 READY  SEVERITY  REASON  SINCE  MESSAGE 
 Cluster/capi-quickstart                                              True                     12m             
 ├─ClusterInfrastructure - OpenStackCluster/capi-quickstart                                                    
-├─ControlPlane - KamajiControlPlane/kamaji-quickstart-control-plane                                           
+├─ControlPlane - StewardControlPlane/kamaji-quickstart-control-plane                                           
 └─Workers                                                                                                     
   └─MachineDeployment/capi-quickstart-md-0                           True                     2m43s           
     └─Machine/capi-quickstart-md-0-f5xz7-w54x9                       True                     3m20s 
@@ -27,7 +27,7 @@ spec:
     serviceDomain: cluster.local
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: kamaji-quickstart-control-plane
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -75,7 +75,7 @@ spec:
       description: "Allow IP-in-IP among workers"
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: kamaji-quickstart-control-plane
   namespace: default
@@ -169,9 +169,9 @@ metadata:
 ## Technical considerations
 
 The Cluster API OpenStack infrastructure provider supports starting from [v0.8.0](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/tag/v0.8.0) the ability to allow update of OpenStackCluster API server fixed IP.
-This is required since Kamaji Control Plane provider is taking care of this task. 
+This is required since Steward Control Plane provider is taking care of this task. 
 
-Once applying the `KamajiControlPlane` manifest, pay attention to performing these actions:
+Once applying the `StewardControlPlane` manifest, pay attention to performing these actions:
 
 - KubeletPreferredAddress must be set as below because dns resolution does not work with Hostname
 ```yaml
@@ -181,7 +181,7 @@ Once applying the `KamajiControlPlane` manifest, pay attention to performing the
       - ExternalIP
       - Hostname
 ```
-- Kamaji can create a OpenStack LoadBalancer for the endpoint of Kamaji Control Plane based on information below.
+- Steward can create a OpenStack LoadBalancer for the endpoint of Steward Control Plane based on information below.
 ```yaml
   network:
     serviceType: LoadBalancer
@@ -192,7 +192,7 @@ Once applying the `KamajiControlPlane` manifest, pay attention to performing the
 
 Once applying the `OpenStackCluster` manifest, pay attention to performing these actions:
 
-- LoadBalancer or FloatingIP functionality for the endpoint of Control Plane provided by the `OpenStackCluster` resource must be disabled because Kamaji creates the endpoint of Control Plane and updates apiServerFixedIP based on it.
+- LoadBalancer or FloatingIP functionality for the endpoint of Control Plane provided by the `OpenStackCluster` resource must be disabled because Steward creates the endpoint of Control Plane and updates apiServerFixedIP based on it.
 ```yaml
   apiServerLoadBalancer:
     enabled: false
@@ -239,4 +239,4 @@ Once applying the manifests, pay attention to performing these actions:
     key: node.cluster.x-k8s.io/uninitialized
 ```
 
-These steps are mandatory since with Kamaji there will not be Control Plane nodes, thus the Cloud Controller Manager will run into worker nodes.
+These steps are mandatory since with Steward there will not be Control Plane nodes, thus the Cloud Controller Manager will run into worker nodes.

@@ -5,15 +5,15 @@ metadata:
     app.kubernetes.io/name: clusterrolebinding
     app.kubernetes.io/instance: manager-rolebinding
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: cluster-api-control-plane-provider-kamaji
-    app.kubernetes.io/part-of: cluster-api-control-plane-provider-kamaji
+    app.kubernetes.io/created-by: cluster-api-control-plane-provider-steward
+    app.kubernetes.io/part-of: cluster-api-control-plane-provider-steward
     app.kubernetes.io/managed-by: kustomize
-  name: capi-kamaji-control-plane-role
+  name: capi-steward-control-plane-role
 rules:
 - apiGroups:
   - controlplane.cluster.x-k8s.io
   resources:
-  - kamajicontrolplanes
+  - stewardcontrolplanes
   verbs:
   - get
   - list
@@ -23,13 +23,13 @@ rules:
 - apiGroups:
   - controlplane.cluster.x-k8s.io
   resources:
-  - kamajicontrolplanes/finalizers
+  - stewardcontrolplanes/finalizers
   verbs:
   - update
 - apiGroups:
   - controlplane.cluster.x-k8s.io
   resources:
-  - kamajicontrolplanes/status
+  - stewardcontrolplanes/status
   verbs:
   - get
   - patch

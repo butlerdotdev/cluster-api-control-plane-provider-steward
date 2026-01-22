@@ -1,4 +1,4 @@
-// Copyright 2023 Clastix Labs
+// Copyright 2025 Butler Labs
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -7,7 +7,7 @@ import (
 	"flag"
 	"os"
 
-	kamajiv1alpha1 "github.com/clastix/kamaji/api/v1alpha1"
+	stewardv1alpha1 "github.com/butlerdotdev/steward/api/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,11 +26,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	controlplanev1alpha1 "github.com/clastix/cluster-api-control-plane-provider-kamaji/api/v1alpha1"
-	"github.com/clastix/cluster-api-control-plane-provider-kamaji/controllers"
-	"github.com/clastix/cluster-api-control-plane-provider-kamaji/pkg/externalclusterreference"
-	"github.com/clastix/cluster-api-control-plane-provider-kamaji/pkg/features"
-	"github.com/clastix/cluster-api-control-plane-provider-kamaji/pkg/indexers"
+	controlplanev1alpha1 "github.com/butlerdotdev/cluster-api-control-plane-provider-steward/api/v1alpha1"
+	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/controllers"
+	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/pkg/externalclusterreference"
+	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/pkg/features"
+	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/pkg/indexers"
 )
 
 var (
@@ -40,7 +40,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(kamajiv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(stewardv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(capiv1beta1.AddToScheme(scheme))
 
 	utilruntime.Must(controlplanev1alpha1.AddToScheme(scheme))
@@ -62,7 +62,7 @@ func main() {
 	flagSet.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flagSet.IntVar(&maxConcurrentReconciles, "max-concurrent-reconciles", 1, "The maximum number of concurrent KamajiControlPlane reconciles which can be run")
+	flagSet.IntVar(&maxConcurrentReconciles, "max-concurrent-reconciles", 1, "The maximum number of concurrent StewardControlPlane reconciles which can be run")
 	// zap logging FlagSet
 	var goFlagSet flag.FlagSet
 
@@ -135,7 +135,7 @@ func main() {
 		},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "kamaji.controlplane.cluster.x-k8s.io",
+		LeaderElectionID:       "steward.controlplane.cluster.x-k8s.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -144,13 +144,13 @@ func main() {
 
 	ecrStore, triggerChannel := externalclusterreference.NewStore(), make(chan event.GenericEvent)
 
-	if err = (&controllers.KamajiControlPlaneReconciler{
+	if err = (&controllers.StewardControlPlaneReconciler{
 		ExternalClusterReferenceStore: ecrStore,
 		FeatureGates:                  featureGate,
 		MaxConcurrentReconciles:       maxConcurrentReconciles,
 		DynamicInfrastructureClusters: sets.New[string](dynamicInfraClusters...),
 	}).SetupWithManager(ctx, mgr, triggerChannel); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "KamajiControlPlane")
+		setupLog.Error(err, "unable to create controller", "controller", "StewardControlPlane")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

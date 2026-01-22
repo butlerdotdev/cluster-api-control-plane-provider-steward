@@ -1,14 +1,14 @@
-# Kamaji and Hetzner
+# Steward and Hetzner
 
-The Kamaji Control Plane provider was able to create a _Hetzner_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create a _Hetzner_ backed Kubernetes cluster by providing Steward Control Planes.
 
-> The Cluster API provider used and tested by Kamaji is the [Syself](https://github.com/syself/cluster-api-provider-hetzner) one.
+> The Cluster API provider used and tested by Steward is the [Syself](https://github.com/syself/cluster-api-provider-hetzner) one.
 
 ```
 NAME                                                        READY  SEVERITY  REASON  SINCE  MESSAGE                                                                        
 Cluster/workload                                            True                     11m                                                                                    
 ├─ClusterInfrastructure - HetznerCluster/workload                                                                                                                           
-├─ControlPlane - KamajiControlPlane/workload-control-plane                                                                                                                  
+├─ControlPlane - StewardControlPlane/workload-control-plane                                                                                                                  
 └─Workers                                                                                                                                                                   
   └─MachineDeployment/workload-md-0                         True                     3m8s                                                                                   
     └─2 Machines...                                         True                     10m    See workload-md-0-5849b98d48xhd4bc-lrlhc, workload-md-0-5849b98d48xhd4bc-txq4j
@@ -144,7 +144,7 @@ spec:
         - 10.244.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: workload-control-plane
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -255,7 +255,7 @@ spec:
       - name: prometherion@akephalos
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: workload-control-plane
   namespace: default
@@ -284,10 +284,10 @@ spec:
 
 ## Technical considerations
 
-If the __management__ cluster is deployed on HetznerCloud the resulting Kamaji Control Plane Service object must have the following annotation: `load-balancer.hetzner.cloud/location=fsn1`.
+If the __management__ cluster is deployed on HetznerCloud the resulting Steward Control Plane Service object must have the following annotation: `load-balancer.hetzner.cloud/location=fsn1`.
 The region (`fsn1`) may vary according to your deployed region.
 
-If you're offloading Kamaji in creating the Load Balancer on your behalf, pay attention in disabling the default Load Balancer using the field `HetznerCloud.controlPlaneLoadBalancer.enabled=false`.
+If you're offloading Steward in creating the Load Balancer on your behalf, pay attention in disabling the default Load Balancer using the field `HetznerCloud.controlPlaneLoadBalancer.enabled=false`.
 The field `HetznerCluster.spec.controlPlaneEndpoint` will be populated once the endpoint is ready and available.
 
 Once provisioned, you have to deploy the [Hetzner Cloud Controller manager](https://github.com/syself/hetzner-cloud-controller-manager) which requires a _Secret_ to interact with the Hetzner API.

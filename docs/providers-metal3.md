@@ -1,12 +1,12 @@
-# Kamaji and Metal³
+# Steward and Metal³
 
-The Kamaji Control Plane provider was able to create a _Metal³_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create a _Metal³_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                        READY  SEVERITY  REASON  SINCE  MESSAGE 
 Cluster/test1                                               True                     13m             
 ├─ClusterInfrastructure - Metal3Cluster/test1               True                     14m             
-├─ControlPlane - KamajiControlPlane/capi-quickstart-metal3                                           
+├─ControlPlane - StewardControlPlane/capi-quickstart-metal3                                           
 └─Workers                                                                                            
   └─MachineDeployment/test1                                 True                     2m40s           
     └─Machine/test1-55b88586c9xxqd46-sg844                  True                     6m48s
@@ -31,7 +31,7 @@ spec:
         - 10.96.0.0/12
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: capi-quickstart-metal3
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -77,7 +77,7 @@ spec:
   prefix: 24
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: capi-quickstart-metal3
   namespace: metal3
@@ -306,7 +306,7 @@ spec:
 
 The said cluster has been created in the [Metal³ Development Environment](https://github.com/metal3-io/metal3-dev-env), as well as the CAPI manifests.
 
-The `KamajiControlPlane` requires a valid address (`spec.network.serviceAddress`) in advance that must matches the `Metal3Cluster.spec.controlPlaneEndpoint.host` field.
+The `StewardControlPlane` requires a valid address (`spec.network.serviceAddress`) in advance that must matches the `Metal3Cluster.spec.controlPlaneEndpoint.host` field.
 As with the port, the `Metal3Cluster.spec.controlPlaneEndpoint.port` must matches the `Cluster.spec.clusterNetwork.apiServerPort` value.
 
 Upon a `Metal3Cluster` resource creation, the Cluster API controller retrieve the provided Control Plane endpoint data, thus, the equality is required to ensure a proper setup.

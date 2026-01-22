@@ -1,6 +1,6 @@
-# Kamaji and Proxmox
+# Steward and Proxmox
 
-The Kamaji Control Plane provider allows creating a _Proxmox by IONOS Cloud_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider allows creating a _Proxmox by IONOS Cloud_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ## Example manifests
 
@@ -17,7 +17,7 @@ spec:
       - REDACTED/REDACTED
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: proxmox-quickstart
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
@@ -25,7 +25,7 @@ spec:
     name: proxmox-quickstart
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: proxmox-quickstart
   namespace: default

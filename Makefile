@@ -28,8 +28,8 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # This variable is used to construct full image tags for bundle and catalog images.
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
-# docker.io/clastix/cluster-api-control-plane-provider-kamaji-bundle:$VERSION and docker.io/clastix/cluster-api-control-plane-provider-kamaji-catalog:$VERSION.
-IMAGE_TAG_BASE ?= docker.io/clastix/cluster-api-control-plane-provider-kamaji
+# docker.io/ghcr.io/butlerdotdev/capi-steward-bundle:$VERSION and docker.io/ghcr.io/butlerdotdev/capi-steward-catalog:$VERSION.
+IMAGE_TAG_BASE ?= docker.io/ghcr.io/butlerdotdev/capi-steward
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
@@ -47,7 +47,7 @@ ifeq ($(USE_IMAGE_DIGESTS), true)
 endif
 
 # Image URL to use all building/pushing image targets
-IMG ?= docker.io/clastix/cluster-api-control-plane-provider-kamaji:$(VERSION)
+IMG ?= docker.io/ghcr.io/butlerdotdev/capi-steward:$(VERSION)
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25.0
 

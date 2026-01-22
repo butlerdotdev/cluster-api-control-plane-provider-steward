@@ -1,0 +1,27 @@
+# permissions for end users to view stewardcontrolplanes.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: stewardcontrolplane-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: cluster-api-control-plane-provider-steward
+    app.kubernetes.io/part-of: cluster-api-control-plane-provider-steward
+    app.kubernetes.io/managed-by: kustomize
+  name: stewardcontrolplane-viewer-role
+rules:
+- apiGroups:
+  - controlplane.cluster.x-k8s.io
+  resources:
+  - stewardcontrolplanes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - controlplane.cluster.x-k8s.io
+  resources:
+  - stewardcontrolplanes/status
+  verbs:
+  - get

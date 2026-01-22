@@ -9,7 +9,7 @@ resources:
 - role_binding.yaml
 - leader_election_role.yaml
 - leader_election_role_binding.yaml
-# Cluster API needs permission to patch the KamajiControlPlane instance,
+# Cluster API needs permission to patch the StewardControlPlane instance,
 # as well as to read the instance statuses.
 - capi_role.yaml
 - capi_role_binding.yaml

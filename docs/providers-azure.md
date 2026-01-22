@@ -1,12 +1,12 @@
-# Kamaji and Azure
+# Steward and Azure
 
-The Kamaji Control Plane provider was able to create an _Azure_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create an _Azure_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                                  READY  SEVERITY  REASON  SINCE  MESSAGE                                                                                           
 Cluster/capi-quickstart                                               True                     31m                                                                                                       
 ├─ClusterInfrastructure - AzureCluster/kamaji-quickstart-control-plane  True                     31m                                                                                                       
-├─ControlPlane - KamajiControlPlane/kamaji-azure-127                                                                                                                                       
+├─ControlPlane - StewardControlPlane/kamaji-azure-127                                                                                                                                       
 └─Workers                                                                                                                                                                                
   └─MachineDeployment/capi-quickstart-md-0                            True                     28s                                                                                                       
     └─3 Machines...                                                   True                     12m    See capi-quickstart-md-0-6848dccdffxn5j9b-cjgp5, capi-quickstart-md-0-6848dccdffxn5j9b-gk95g, ...
@@ -30,7 +30,7 @@ spec:
         - 10.244.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: kamaji-quickstart-control-plane
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -74,7 +74,7 @@ spec:
   type: ServicePrincipal
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: kamaji-quickstart-control-plane
   namespace: default
