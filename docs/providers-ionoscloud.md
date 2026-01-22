@@ -1,12 +1,12 @@
-# Kamaji and IONOS Cloud
+# Steward and IONOS Cloud
 
-The Kamaji Control Plane provider was able to create an _IONOS Cloud_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create an _IONOS Cloud_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                           READY  SEVERITY  REASON  SINCE  MESSAGE
 Cluster/kamaji-quickstart                                      True                     10m
 ├─ClusterInfrastructure - IonosCloudCluster/kamaji-quickstart  True                     11m
-├─ControlPlane - KamajiControlPlane/kamaji-quickstart
+├─ControlPlane - StewardControlPlane/kamaji-quickstart
 └─Workers
   └─MachineDeployment/kamaji-quickstart                        True                     19s
     └─Machine/kamaji-quickstart-xqwjx-5xhln                    True                     105s
@@ -28,7 +28,7 @@ spec:
       cidrBlocks:
         - 192.168.0.0/16
   controlPlaneRef:
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
     name: kamaji-quickstart
   infrastructureRef:
@@ -56,7 +56,7 @@ spec:
   credentialsRef:
     name: kamaji-quickstart-credentials
 ---
-kind: KamajiControlPlane
+kind: StewardControlPlane
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
 metadata:
   name: kamaji-quickstart
@@ -147,7 +147,7 @@ spec:
 
 ## Technical considerations
 
-The Cluster API IONOS Cloud infrastructure provider supports Kamaji managed Control Planes starting from [v0.4.0](https://github.com/ionos-cloud/cluster-api-provider-ionoscloud/releases/tag/v0.4.0).
+The Cluster API IONOS Cloud infrastructure provider supports Steward managed Control Planes starting from [v0.4.0](https://github.com/ionos-cloud/cluster-api-provider-ionoscloud/releases/tag/v0.4.0).
 
-To make use of service type `LoadBalancer` for the `KamajiControlPlane`, you need to install the [IONOS Cloud Controller Manager](https://github.com/ionos-cloud/cloud-provider-ionoscloud/tree/main/charts/ionoscloud-cloud-controller-manager).
+To make use of service type `LoadBalancer` for the `StewardControlPlane`, you need to install the [IONOS Cloud Controller Manager](https://github.com/ionos-cloud/cloud-provider-ionoscloud/tree/main/charts/ionoscloud-cloud-controller-manager).
 Alternatively, you can install the CAPI stack in a [managed cluster](https://cloud.ionos.com/managed/kubernetes).

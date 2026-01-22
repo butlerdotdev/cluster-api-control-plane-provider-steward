@@ -1,4 +1,4 @@
-// Copyright 2023 Clastix Labs
+// Copyright 2025 Butler Labs
 // SPDX-License-Identifier: Apache-2.0
 
 package controllers
@@ -16,7 +16,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	capiv1alpha1 "github.com/clastix/cluster-api-control-plane-provider-kamaji/api/v1alpha1"
+	capiv1alpha1 "github.com/butlerdotdev/cluster-api-control-plane-provider-steward/api/v1alpha1"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

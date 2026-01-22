@@ -26,7 +26,7 @@ rules:
 - apiGroups:
   - controlplane.cluster.x-k8s.io
   resources:
-  - kamajicontrolplanes
+  - stewardcontrolplanes
   verbs:
   - create
   - delete
@@ -38,13 +38,13 @@ rules:
 - apiGroups:
   - controlplane.cluster.x-k8s.io
   resources:
-  - kamajicontrolplanes/finalizers
+  - stewardcontrolplanes/finalizers
   verbs:
   - update
 - apiGroups:
   - controlplane.cluster.x-k8s.io
   resources:
-  - kamajicontrolplanes/status
+  - stewardcontrolplanes/status
   verbs:
   - get
   - patch
@@ -85,7 +85,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - kamaji.clastix.io
+  - steward.butlerlabs.dev
   resources:
   - tenantcontrolplanes
   verbs:

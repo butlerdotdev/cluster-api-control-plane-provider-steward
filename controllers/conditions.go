@@ -1,4 +1,4 @@
-// Copyright 2023 Clastix Labs
+// Copyright 2025 Butler Labs
 // SPDX-License-Identifier: Apache-2.0
 
 package controllers
@@ -8,10 +8,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/clastix/cluster-api-control-plane-provider-kamaji/api/v1alpha1"
+	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/api/v1alpha1"
 )
 
-func TrackConditionType(conditions *[]metav1.Condition, conditionType v1alpha1.KamajiControlPlaneConditionType, observedGeneration int64, fn func() error) { //nolint:varnamelen
+func TrackConditionType(conditions *[]metav1.Condition, conditionType v1alpha1.StewardControlPlaneConditionType, observedGeneration int64, fn func() error) { //nolint:varnamelen
 	condition := meta.FindStatusCondition(*conditions, string(conditionType))
 	if condition == nil {
 		condition = &metav1.Condition{Type: string(conditionType)}

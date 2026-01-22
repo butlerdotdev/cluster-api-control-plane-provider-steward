@@ -29,10 +29,10 @@ jobs:
         with:
           push: false
           load: true
-          tags: docker.io/clastix/cluster-api-control-plane-provider-kamaji:${{ github.sha }}
+          tags: docker.io/butlerlabs/cluster-api-control-plane-provider-steward:${{ github.sha }}
       - name: "Load image into kind cluster"
         run: |
-          kind load docker-image --name chart-testing docker.io/clastix/cluster-api-control-plane-provider-kamaji:$GITHUB_SHA
+          kind load docker-image --name chart-testing docker.io/butlerlabs/cluster-api-control-plane-provider-steward:$GITHUB_SHA
       - name: "Setup Kubevirt Infrastructure Stack"
         run: |
           # Install Metal LB for exposing Kubevirt based Workload Cluster's Api server
@@ -80,7 +80,7 @@ jobs:
           ./get_helm.sh
           helm version
 
-      - name: "Setup kamaji"
+      - name: "Setup steward"
         run: |
           helm repo add jetstack https://charts.jetstack.io
           helm repo update
@@ -92,36 +92,36 @@ jobs:
             --set installCRDs=true \
             --debug
 
-          helm repo add clastix https://clastix.github.io/charts
+          helm repo add butlerlabs https://butlerlabs.github.io/charts
           helm repo update
-          helm install kamaji clastix/kamaji -n kamaji-system --create-namespace --debug \
+          helm install steward butlerlabs/steward -n steward-system --create-namespace --debug \
             --set 'resources=null' --timeout=10m
 
       - name: "Setup clusterctl config"
         run: |
-          sed -i "s/docker.io\/clastix\/cluster-api-control-plane-provider-kamaji:.*/docker.io\/clastix\/cluster-api-control-plane-provider-kamaji:$GITHUB_SHA/g" config/control-plane-components.yaml
-          mkdir -p ${HOME}/control-plane-kamaji/v0.11.0/
-          cp config/control-plane-components.yaml ${HOME}/control-plane-kamaji/v0.11.0/
-          cp config/metadata.yaml ${HOME}/control-plane-kamaji/v0.11.0/
+          sed -i "s/docker.io\/butlerlabs\/cluster-api-control-plane-provider-steward:.*/docker.io\/butlerlabs\/cluster-api-control-plane-provider-steward:$GITHUB_SHA/g" config/control-plane-components.yaml
+          mkdir -p ${HOME}/control-plane-steward/v0.11.0/
+          cp config/control-plane-components.yaml ${HOME}/control-plane-steward/v0.11.0/
+          cp config/metadata.yaml ${HOME}/control-plane-steward/v0.11.0/
 
           mkdir ~/.cluster-api
           touch ~/.cluster-api/clusterctl.yaml
 
           cat <<EOF > ~/.cluster-api/clusterctl.yaml
           providers:
-          - name: "kamaji"
-            url: "${HOME}/control-plane-kamaji/v0.11.0/control-plane-components.yaml"
+          - name: "steward"
+            url: "${HOME}/control-plane-steward/v0.11.0/control-plane-components.yaml"
             type: "ControlPlaneProvider"
           EOF
 
-      - name: "Install CAPI stack with kubevirt as infra and kamaji as controlplane providers"
+      - name: "Install CAPI stack with kubevirt as infra and steward as controlplane providers"
         run: |
-          clusterctl init --infrastructure kubevirt --control-plane kamaji
+          clusterctl init --infrastructure kubevirt --control-plane steward
 
-          kubectl wait deploy -n kamaji-system capi-kamaji-controller-manager --for=condition=Available --timeout=10m
+          kubectl wait deploy -n steward-system capi-steward-controller-manager --for=condition=Available --timeout=10m
           kubectl wait deploy -n capi-kubeadm-bootstrap-system capi-kubeadm-bootstrap-controller-manager  --for=condition=Available --timeout=10m
           kubectl wait deploy -n capi-system capi-controller-manager  --for=condition=Available --timeout=10m
-          IMAGE=$(kubectl get deploy -n kamaji-system capi-kamaji-controller-manager -o yaml | grep image | grep $GITHUB_SHA)
+          IMAGE=$(kubectl get deploy -n steward-system capi-steward-controller-manager -o yaml | grep image | grep $GITHUB_SHA)
           if [[ $IMAGE != *"$GITHUB_SHA"* ]]; then
             echo "Not using the expected PR image"
             exit 1
@@ -131,7 +131,7 @@ jobs:
         run: |
             kubectl apply -f .github/workflows/assets/targetcluster-controlplane.yaml
             kubectl wait cluster capi-quickstart --for=condition=InfrastructureReady --timeout=10m
-            kubectl wait kamajicontrolplane capi-quickstart-kubevirt --for=condition=KamajiControlPlaneIsReady --timeout=10m
+            kubectl wait stewardcontrolplane capi-quickstart-kubevirt --for=condition=StewardControlPlaneIsReady --timeout=10m
 
             kubectl apply -f .github/workflows/assets/targetcluster-workers.yaml
 

@@ -1,12 +1,12 @@
-# Kamaji and Equinix
+# Steward and Equinix
 
-The Kamaji Control Plane provider was able to create a _Packet_ (now Equinix) backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create a _Packet_ (now Equinix) backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                            READY  SEVERITY  REASON  SINCE  MESSAGE                                                                                                   
 Cluster/capi-quickstart                                         True                     7m20s                                                                                                             
 ├─ClusterInfrastructure - PacketCluster/capi-quickstart                                                                                                                                                    
-├─ControlPlane - KamajiControlPlane/capi-equinix-control-plane                                                                                                                                             
+├─ControlPlane - StewardControlPlane/capi-equinix-control-plane                                                                                                                                             
 └─Workers                                                                                                                                                                                                  
   └─MachineDeployment/capi-quickstart-worker-a                  True                     2m1s                                                                                                              
     └─3 Machines...                                             True                     4m6s   See capi-quickstart-worker-a-777b67559bxq6dw9-2rxc4, capi-quickstart-worker-a-777b67559bxq6dw9-fw29m, ..
@@ -32,7 +32,7 @@ spec:
         - 172.26.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: capi-equinix-control-plane
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -51,7 +51,7 @@ spec:
   projectID: REDACTED
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: capi-equinix-control-plane
   namespace: default
@@ -180,6 +180,6 @@ spec:
 According to the said manifests, the `PacketCluster` resource must be marked as externally managed using the annotation `cluster.x-k8s.io/managed-by`.
 
 The reason behind that is that the CAPI Packet provider is automatically creating a "VIP Manager" service for the Control Plane VMs.
-However, Kamaji is providing Kubernetes Control Plane as a Service and taking care of the creation of the required Load Balancer from the management cluster.
+However, Steward is providing Kubernetes Control Plane as a Service and taking care of the creation of the required Load Balancer from the management cluster.
 
-Thanks to the said annotation, the Kamaji Control Plane provider will wait for the Control Plane address reachability, and patch the `PacketCluster` with the right address, besides marking the Infrastructure as ready to continue the provisioning process.
+Thanks to the said annotation, the Steward Control Plane provider will wait for the Control Plane address reachability, and patch the `PacketCluster` with the right address, besides marking the Infrastructure as ready to continue the provisioning process.

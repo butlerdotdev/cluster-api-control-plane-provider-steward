@@ -1,12 +1,12 @@
-# Kamaji and Nutanix
+# Steward and Nutanix
 
-The Kamaji Control Plane provider was able to create a _Nutanix_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create a _Nutanix_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                      READY  SEVERITY  REASON  SINCE  MESSAGE
 Cluster/capi-quickstart                                   True                     5m42s
 ├─ClusterInfrastructure - NutanixCluster/capi-quickstart
-├─ControlPlane - KamajiControlPlane/kamaji-nutanix-127
+├─ControlPlane - StewardControlPlane/kamaji-nutanix-127
 └─Workers
   └─MachineDeployment/capi-quickstart-md-0                True                     68s
     └─3 Machines...                                       True                     5m13s  See capi-quickstart-md-0-nfz4l-7hkx7, capi-quickstart-md-0-nfz4l-8wj6v, ...
@@ -31,7 +31,7 @@ spec:
         - 192.168.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: kamaji-nutanix-127
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -44,11 +44,11 @@ metadata:
   name: capi-quickstart
 spec:
   controlPlaneEndpoint:
-    host: 0.0.0.0 # will be automatically patch by Kamaji controller
-    port: 0 # will be automatically patch by Kamaji controller
+    host: 0.0.0.0 # will be automatically patch by Steward controller
+    port: 0 # will be automatically patch by Steward controller
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: kamaji-nutanix-127
   namespace: default
@@ -185,11 +185,11 @@ spec:
 ## Technical considerations
 
 The Nutanix Kubernetes cluster is requiring a VIP for the Control Plane component.
-To maintain the same experience you have to know in advance the Kamaji Tenant Control Plane address, and port.
+To maintain the same experience you have to know in advance the Steward Tenant Control Plane address, and port.
 
 In regard to the address, the following values must be the same:
 
-- `KamajiControlPlane.spec.network.address`
+- `StewardControlPlane.spec.network.address`
 - `NutanixCluster.spec.controlPlaneEndpoint.host`
 
 The same applies for the Kubernetes API Server binding port:
@@ -198,11 +198,11 @@ The same applies for the Kubernetes API Server binding port:
 - `NutanixCluster.spec.controlPlaneEndpoint.port`
 
 If you install a Service Load Balancer solution (MetalLB, Kube-VIP, ...) in your management cluster you can skip this kind of check.
-VIP will be automatically assigned and the Kamaji Control Plane provider will take care of patching the `NutanixCluster` resource with the endpoint provided by Kamaji itself.
+VIP will be automatically assigned and the Steward Control Plane provider will take care of patching the `NutanixCluster` resource with the endpoint provided by Steward itself.
 
 ## Kubernetes Nutanix Cloud Controller Manager customisation
 
-As there is no Control Plane node with Kamaji architecture you are not able to run pods directly on it. In this case we need to customize the Nutanix Cloud Controller Manager install and remove the nodeSelector to let it run directly on the worker nodes.
+As there is no Control Plane node with Steward architecture you are not able to run pods directly on it. In this case we need to customize the Nutanix Cloud Controller Manager install and remove the nodeSelector to let it run directly on the worker nodes.
 
 Nutanix Cloud Controller HelmChartProxy example is in the manifest above.
 

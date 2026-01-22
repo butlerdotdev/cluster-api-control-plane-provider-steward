@@ -1,4 +1,4 @@
-// Copyright 2023 Clastix Labs
+// Copyright 2025 Butler Labs
 // SPDX-License-Identifier: Apache-2.0
 
 package externalclusterreference
@@ -6,17 +6,17 @@ package externalclusterreference
 import (
 	"strings"
 
-	kamajiv1alpha1 "github.com/clastix/kamaji/api/v1alpha1"
+	stewardv1alpha1 "github.com/butlerdotdev/steward/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/clastix/cluster-api-control-plane-provider-kamaji/api/v1alpha1"
+	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/api/v1alpha1"
 )
 
 const (
 	RemoteTCPPrefix = "kcp-"
 )
 
-func ParseKamajiControlPlaneUIDFromTenantControlPlane(tcp kamajiv1alpha1.TenantControlPlane) string {
+func ParseStewardControlPlaneUIDFromTenantControlPlane(tcp stewardv1alpha1.TenantControlPlane) string {
 	if !strings.HasPrefix(tcp.Name, RemoteTCPPrefix) {
 		return ""
 	}
@@ -24,7 +24,7 @@ func ParseKamajiControlPlaneUIDFromTenantControlPlane(tcp kamajiv1alpha1.TenantC
 	return strings.TrimPrefix(tcp.Name, RemoteTCPPrefix)
 }
 
-func GenerateRemoteTenantControlPlaneNames(kcp v1alpha1.KamajiControlPlane) (name string, namespace string) { //nolint:nonamedreturns
+func GenerateRemoteTenantControlPlaneNames(kcp v1alpha1.StewardControlPlane) (name string, namespace string) { //nolint:nonamedreturns
 	return RemoteTCPPrefix + string(kcp.UID), kcp.Spec.Deployment.ExternalClusterReference.DeploymentNamespace
 }
 
@@ -38,7 +38,7 @@ func GenerateKeyNameFromSecret(secret *corev1.Secret) []string {
 	return names
 }
 
-func GenerateKeyNameFromKamaji(kcp *v1alpha1.KamajiControlPlane) string {
+func GenerateKeyNameFromSteward(kcp *v1alpha1.StewardControlPlane) string {
 	namespace := kcp.Namespace
 
 	if kcp.Spec.Deployment.ExternalClusterReference.KubeconfigSecretNamespace != "" {

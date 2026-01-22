@@ -1,12 +1,12 @@
-# Kamaji and vSphere
+# Steward and vSphere
 
-The Kamaji Control Plane provider was able to create a _vSphere_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create a _vSphere_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                       READY  SEVERITY  REASON  SINCE  MESSAGE
 Cluster/capi-quickstart                                    True                     33m
 ├─ClusterInfrastructure - VSphereCluster/capi-quickstart   True                     34m
-├─ControlPlane - KamajiControlPlane/kamaji-vsphere-125
+├─ControlPlane - StewardControlPlane/kamaji-vsphere-125
 └─Workers
   └─MachineDeployment/capi-quickstart-md-0                 True                     80s
     └─3 Machines...                                        True                     32m    See capi-quickstart-md-0-694f486d5xk9jj5-8b5xd, capi-quickstart-md-0-694f486d5xk9jj5-mr966, ...
@@ -29,7 +29,7 @@ spec:
         - 192.168.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: kamaji-vsphere-125
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -51,7 +51,7 @@ spec:
   thumbprint: REDACTED # VSPHERE_TLS_THUMBPRINT
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: kamaji-vsphere-125
   namespace: default
@@ -166,11 +166,11 @@ stringData:
 ## Technical considerations
 
 The vSphere Kubernetes cluster is requiring a VIP for the Control Plane component.
-To maintain the same experience you have to know in advance the Kamaji Tenant Control Plane address, and port.
+To maintain the same experience you have to know in advance the Steward Tenant Control Plane address, and port.
 
 In regard to the address, the following values must be the same:
 
-- `KamajiControlPlane.spec.network.address`
+- `StewardControlPlane.spec.network.address`
 - `VSphereCluster.spec.controlPlaneEndpoint.host`
 
 The same applies for the Kubernetes API Server binding port:
@@ -179,7 +179,7 @@ The same applies for the Kubernetes API Server binding port:
 - `VSphereCluster.spec.controlPlaneEndpoint.port`
 
 If your management cluster is offering a native Load Balancer solution you can skip this kind of check.
-The Kamaji Control Plane provider will take care of patching the `VSphereCluster` resource with the endpoint provided by Kamaji itself.
+The Steward Control Plane provider will take care of patching the `VSphereCluster` resource with the endpoint provided by Steward itself.
 
 ## Kubernetes vSphere Cloud Provider customisation
 

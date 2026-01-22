@@ -1,12 +1,12 @@
-# Kamaji and AWS
+# Steward and AWS
 
-The Kamaji Control Plane provider was able to create an _AWS_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create an _AWS_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                                  READY  SEVERITY  REASON  SINCE  MESSAGE                                                                                           
 Cluster/capi-quickstart                                               True                     31m                                                                                                       
 ├─ClusterInfrastructure - AWSCluster/kamaji-quickstart-control-plane  True                     31m                                                                                                       
-├─ControlPlane - KamajiControlPlane/kamaji-aws-127                                                                                                                                       
+├─ControlPlane - StewardControlPlane/kamaji-aws-127                                                                                                                                       
 └─Workers                                                                                                                                                                                
   └─MachineDeployment/capi-quickstart-md-0                            True                     28s                                                                                                       
     └─3 Machines...                                                   True                     12m    See capi-quickstart-md-0-6848dccdffxn5j9b-cjgp5, capi-quickstart-md-0-6848dccdffxn5j9b-gk95g, ...
@@ -29,7 +29,7 @@ spec:
         - 192.168.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: kamaji-quickstart-control-plane
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
@@ -48,7 +48,7 @@ spec:
     loadBalancerType: disabled
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: kamaji-quickstart-control-plane
   namespace: default
@@ -127,7 +127,7 @@ spec:
 ## Technical considerations
 
 The Cluster API AWS infrastructure provider supports starting from [v2.4.0](https://github.com/kubernetes-sigs/cluster-api-provider-aws/releases/tag/v2.4.0) the ability to disable the Control Plane load balancer.
-This is required since Kamaji Control Plane provider is taking care of this task.
+This is required since Steward Control Plane provider is taking care of this task.
 
 Once the cluster has been provisioned, you need to install the [AWS Cloud Controller Manager](https://github.com/kubernetes/cloud-provider-aws).
 You can follow the documentation available in the [CAPA documentation website](https://cluster-api-aws.sigs.k8s.io/topics/external-cloud-provider-with-ebs-csi-driver).
@@ -138,9 +138,9 @@ Once applying the manifests, pay attention to performing these actions:
 - the `nodeSelector` must be removed, or updated according to your topology
 - tolerations must be aligned to the workload nodes ones
 
-These steps are mandatory since with Kamaji there will not be Control Plane nodes, thus the Cloud Controller Manager will run into worker ones.
+These steps are mandatory since with Steward there will not be Control Plane nodes, thus the Cloud Controller Manager will run into worker ones.
 
-## Running the Kamaji management cluster on AWS
+## Running the Steward management cluster on AWS
 
 If you're aiming to run the management cluster on AWS the `TenantControlPlane` requires some additional hack due to AWS ELBs CNAME-based ingress.
 

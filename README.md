@@ -1,6 +1,6 @@
-![Kamaji Cluster API Control Plane provider](./assets/cover.png)
+![Steward Cluster API Control Plane provider](./assets/cover.png)
 
-## Kamaji Cluster API Control Plane provider
+## Steward Cluster API Control Plane provider
 
 <p align="left">
   <img src="https://img.shields.io/github/license/clastix/cluster-api-control-plane-provider-kamaji"/>
@@ -10,18 +10,18 @@
   <a href="https://kubernetes.slack.com/archives/C03GLTTMWNN"><img alt="#kamaji on Kubernetes Slack" src="https://img.shields.io/badge/slack-@kubernetes/kamaji-blue.svg?logo=slack"/></a>
 </p>
 
-The Kamaji Control Plane provider implementation of the [Cluster Management API](https://cluster-api.sigs.k8s.io/).
+The Steward Control Plane provider implementation of the [Cluster Management API](https://cluster-api.sigs.k8s.io/).
 
-### 🤔 What is Kamaji?
+### 🤔 What is Steward?
 
-[Kamaji](http://github.com/clastix/kamaji) is an Open-Source project offering hosted Kubernetes control planes.
+[Steward](http://github.com/clastix/kamaji) is an Open-Source project offering hosted Kubernetes control planes.
 tl;dr; the Control Plane is running in a management cluster as regular pods.
 
 You can refer to the [official documentation website](https://kamaji.clastix.io/).
 
 ### 📄 Documentation
 
-The Kamaji Cluster API Control Plane provider documentation is referenced in the [Kamaji documentation](https://kamaji.clastix.io/cluster-api/) website.
+The Steward Cluster API Control Plane provider documentation is referenced in the [Steward documentation](https://kamaji.clastix.io/cluster-api/) website.
 
 ### 🚀 Supported CAPI infrastructure providers
 
@@ -51,9 +51,9 @@ Before the next steps, make sure the initial setup for development environment s
 
 1. Create a `kind` cluster according to the [CAPI Infrastructure Provider requirements](https://cluster-api.sigs.k8s.io/user/quick-start#install-andor-configure-a-kubernetes-cluster) you're planning to use
 2. [Install Cluster API](https://cluster-api.sigs.k8s.io/user/quick-start#initialize-the-management-cluster) with the `clusterctl` CLI
-3. Install Kamaji (for the sake of simplicity, we suggest [Helm](https://github.com/clastix/kamaji/tree/master/charts/kamaji#install-kamaji))
-4. Get the source of the Kamaji Control Plane provider and place in your desired `LOCATION`
-5. Run the _Kamaji Cluster API Control Plane Provider_ as you prefer, as well as with `dlv` to debug it 
+3. Install Steward (for the sake of simplicity, we suggest [Helm](https://github.com/clastix/kamaji/tree/master/charts/kamaji#install-kamaji))
+4. Get the source of the Steward Control Plane provider and place in your desired `LOCATION`
+5. Run the _Steward Cluster API Control Plane Provider_ as you prefer, as well as with `dlv` to debug it 
 6. Run Tilt by issuing `tilt up`
 7. You have a full development environment
 
@@ -75,24 +75,24 @@ Commits are used to generate the changelog, and their author will be referenced 
 
 ### 📝 License
 
-The Kamaji Cluster API Control Plane provider is licensed under Apache 2.0.
+The Steward Cluster API Control Plane provider is licensed under Apache 2.0.
 The code is provided as-is with no warranties.
 
-### 📄 Kamaji compatibility
+### 📄 Steward compatibility
 
 As of July 2024, CLASTIX Labs organisation does no longer provide stable release artefacts in favour of [edge releases](https://kamaji.clastix.io/reference/versioning/#edge-releases).
 
 Although CLASTIX Labs strives to provide production-grade artefacts even for edge releases,
-starting from v0.12.0 the Kamaji Cluster API Control Plane provider will not use a stable version pinning in favour of edge releases.
+starting from v0.12.0 the Steward Cluster API Control Plane provider will not use a stable version pinning in favour of edge releases.
 
-To ensure a perfect compatibility and a production grade implementation between Kamaji and the Cluster API Control Plane provider,
+To ensure a perfect compatibility and a production grade implementation between Steward and the Cluster API Control Plane provider,
 we suggest getting in touch with CLASTIX Labs to achieve commercial support.
 
 ### 🛟 Commercial Support
 
-[CLASTIX](https://clastix.io/) is the commercial company behind Kamaji and the Cluster API Control Plane provider.
+[CLASTIX](https://clastix.io/) is the commercial company behind Steward and the Cluster API Control Plane provider.
 
-If you're looking to run Kamaji in production and would like to learn more, **CLASTIX** can help by offering [Open Source support plans](https://clastix.io/support),
-as well as providing a comprehensive Enterprise Platform named [CLASTIX Enterprise Platform](https://clastix.cloud/), built on top of the Kamaji and [Capsule](https://capsule.clastix.io/) project (now donated to CNCF as a Sandbox project).
+If you're looking to run Steward in production and would like to learn more, **CLASTIX** can help by offering [Open Source support plans](https://clastix.io/support),
+as well as providing a comprehensive Enterprise Platform named [CLASTIX Enterprise Platform](https://clastix.cloud/), built on top of the Steward and [Capsule](https://capsule.clastix.io/) project (now donated to CNCF as a Sandbox project).
 
 Feel free to get in touch with the provided [Contact form](https://clastix.io/contact).

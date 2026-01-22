@@ -1,12 +1,12 @@
-# Kamaji and KubeVirt
+# Steward and KubeVirt
 
-The Kamaji Control Plane provider was able to create a _KubeVirt_ backed Kubernetes cluster by providing Kamaji Control Planes.
+The Steward Control Plane provider was able to create a _KubeVirt_ backed Kubernetes cluster by providing Steward Control Planes.
 
 ```
 NAME                                                          READY  SEVERITY  REASON  SINCE  MESSAGE                                                                                           
 Cluster/capi-quickstart                                       True                     7m3s                                                                                                      
 ├─ClusterInfrastructure - KubevirtCluster/capi-quickstart                                                                                                                                        
-├─ControlPlane - KamajiControlPlane/capi-quickstart-kubevirt                                                                                                                                     
+├─ControlPlane - StewardControlPlane/capi-quickstart-kubevirt                                                                                                                                     
 └─Workers                                                                                                                                                                                        
   └─MachineDeployment/capi-quickstart-md-0                    True                     9s                                                                                                        
     └─3 Machines...                                           True                     50s    See capi-quickstart-md-0-795b94c44fxspk46-btcbb, capi-quickstart-md-0-795b94c44fxspk46-ld6sj, ...
@@ -32,7 +32,7 @@ spec:
       - 10.95.0.0/16
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-    kind: KamajiControlPlane
+    kind: StewardControlPlane
     name: capi-quickstart-kubevirt
     namespace: default
   infrastructureRef:
@@ -50,7 +50,7 @@ metadata:
   namespace: default
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
-kind: KamajiControlPlane
+kind: StewardControlPlane
 metadata:
   name: capi-quickstart-kubevirt
   namespace: default
@@ -147,9 +147,9 @@ spec:
 
 According to the said manifests, the `KubevirtCluster` resource must be marked as externally managed using the annotation `cluster.x-k8s.io/managed-by`.
 
-The reason behind that is that the CAPI KubeVirt provider is automatically creating a "Load Balancer" service for the Control Plane VMs, although these will be missing since Kamaji will take care of the Control Plane component.
+The reason behind that is that the CAPI KubeVirt provider is automatically creating a "Load Balancer" service for the Control Plane VMs, although these will be missing since Steward will take care of the Control Plane component.
 
-This is made possible by the said annotation and will let the Kamaji Control Plane provider to patch the `KubeVirtCluster` with the address and port provisioned by Kamaji itself, with no extra `Service` resources.
+This is made possible by the said annotation and will let the Steward Control Plane provider to patch the `KubeVirtCluster` with the address and port provisioned by Steward itself, with no extra `Service` resources.
 
 ```
 $: kubectl get svc
