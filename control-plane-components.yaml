@@ -14386,17 +14386,18 @@ spec:
       containers:
       - args:
         - --leader-elect
-        - --feature-gates=DynamicInfrastructureClusterPatch=false,ExternalClusterReference=false,ExternalClusterReferenceCrossNamespace=false,SkipInfraClusterPatch=false
+        - --feature-gates=DynamicInfrastructureClusterPatch=${CACPPK_DYNAMIC_INFRASTRUCTURE_CLUSTER_PATCH:=false},ExternalClusterReference=${CACPPK_EXTERNAL_CLUSTER_REFERENCE:=false},ExternalClusterReferenceCrossNamespace=${CACPPK_EXTERNAL_CLUSTER_REFERENCE_CROSS_NAMESPACE:=false},SkipInfraClusterPatch=${CACPPK_SKIP_INFRA_CLUSTER_PATCH:=false}
+        - --dynamic-infrastructure-clusters=${CACPPK_INFRASTRUCTURE_CLUSTERS:= }
         command:
         - /manager
-        image: ghcr.io/butlerdotdev/capi-steward:v0.16.0
+        image: ghcr.io/butlerdotdev/capi-steward:v0.1.0
         livenessProbe:
           httpGet:
             path: /healthz
             port: 8081
           initialDelaySeconds: 15
           periodSeconds: 20
-        name: manager
+        name: controller
         readinessProbe:
           httpGet:
             path: /readyz
@@ -14417,7 +14418,5 @@ spec:
             - ALL
       securityContext:
         runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
       serviceAccountName: capi-steward-controller-manager
       terminationGracePeriodSeconds: 10

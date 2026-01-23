@@ -37,7 +37,7 @@ spec:
         control-plane: controller-manager
     spec:
       # TODO(user): Uncomment the following code to configure the nodeAffinity expression
-      # according to the platforms which are supported by your solution. 
+      # according to the platforms which are supported by your solution.
       # It is considered best practice to support multiple architectures. You can
       # build your manager image using the makefile target docker-buildx.
       # affinity:
@@ -58,22 +58,27 @@ spec:
       #               - linux
       securityContext:
         runAsNonRoot: true
-        # TODO(user): For common cases that do not require escalating privileges
-        # it is recommended to ensure that all your Pods/Containers are restrictive.
-        # More info: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
-        # Please uncomment the following code if your project does NOT have to work on old Kubernetes
-        # versions < 1.19 or on vendors versions which do NOT support this field by default (i.e. Openshift < 4.11 ).
-        # seccompProfile:
-        #   type: RuntimeDefault
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - command:
         - /manager
         args:
         - --leader-elect
-        - "--feature-gates=DynamicInfrastructureClusterPatch=${CACPPK_DYNAMIC_INFRASTRUCTURE_CLUSTER_PATCH:=false},ExternalClusterReference=${CACPPK_EXTERNAL_CLUSTER_REFERENCE:=false},ExternalClusterReferenceCrossNamespace=${CACPPK_EXTERNAL_CLUSTER_REFERENCE_CROSS_NAMESPACE:=false},SkipInfraClusterPatch=${CACPPK_SKIP_INFRA_CLUSTER_PATCH:=false}"
-        - "--dynamic-infrastructure-clusters=${CACPPK_INFRASTRUCTURE_CLUSTERS:= }"
+        # IMPORTANT: Use literal boolean values, NOT shell variable substitution.
+        # Shell substitution like ${VAR:=default} only works in shell contexts,
+        # not in Kubernetes manifests. The original Kamaji CAPI provider had these
+        # patterns which caused parse errors during bootstrap:
+        #   "invalid syntax" for feature-gates values
+        #
+        # All feature gates disabled by default for stability:
+        # - DynamicInfrastructureClusterPatch: Dynamically patch infrastructure cluster
+        # - ExternalClusterReference: Allow external cluster references
+        # - ExternalClusterReferenceCrossNamespace: Cross-namespace external refs
+        # - SkipInfraClusterPatch: Skip patching infrastructure cluster
+        - --feature-gates=DynamicInfrastructureClusterPatch=false,ExternalClusterReference=false,ExternalClusterReferenceCrossNamespace=false,SkipInfraClusterPatch=false
         image: controller:latest
-        name: controller
+        name: manager
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -91,8 +96,6 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
-        # TODO(user): Configure the resources accordingly based on the project requirements.
-        # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
         resources:
           limits:
             cpu: 500m
