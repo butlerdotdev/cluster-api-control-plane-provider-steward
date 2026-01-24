@@ -1,14 +1,25 @@
+# Copyright 2025 The Butler Authors.
+# SPDX-License-Identifier: Apache-2.0
 name: CI
 
 on:
   push:
     branches:
-      - main
-      - master
+      - '**'
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+      - 'config/**'
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [main, master]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+      - 'config/**'
 
 permissions:
   contents: read
@@ -18,6 +29,7 @@ jobs:
   commit_lint:
     name: Lint Commits
     runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,11 +41,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-      
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
@@ -45,40 +55,32 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-      
       - name: Run tests
-        run: |
-          CGO_ENABLED=0 go test -v ./...
+        run: CGO_ENABLED=0 go test -v ./...
 
   diff:
     name: Check Generated Files
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-      
       - name: Install tools
         run: |
           make controller-gen
           make kustomize
-      
       - name: Generate manifests
         run: |
           make generate
           make manifests
-      
       - name: Generate release manifests
         run: make release
         env:
           CGO_ENABLED: 0
-      
       - name: Check for untracked changes
         run: |
           if [[ $(git diff | wc -l) -gt 0 ]]; then
@@ -86,7 +88,6 @@ jobs:
             git --no-pager diff
             exit 1
           fi
-      
       - name: Check for untracked files
         run: |
           if [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]]; then
@@ -94,15 +95,6 @@ jobs:
             git ls-files --others --exclude-standard
             exit 1
           fi
-      
-      - name: Verify control-plane-components.yaml exists
-        run: |
-          if [[ ! -f config/control-plane-components.yaml ]]; then
-            echo ">>> config/control-plane-components.yaml not found!"
-            exit 1
-          fi
-          echo "=== control-plane-components.yaml found ==="
-          head -50 config/control-plane-components.yaml
 
   build:
     name: Build
@@ -110,15 +102,10 @@ jobs:
     needs: [golangci, test, diff]
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-      
       - name: Build
-        run: |
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/manager ./main.go
-      
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/manager ./main.go
       - name: Build ARM64
-        run: |
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/manager-arm64 ./main.go
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/manager-arm64 ./main.go

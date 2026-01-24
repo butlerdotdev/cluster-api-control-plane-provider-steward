@@ -1,14 +1,26 @@
+# Copyright 2025 The Butler Authors.
+# SPDX-License-Identifier: Apache-2.0
 name: E2E
 
 on:
   push:
-    branches:
-      - "master"
-      - "main"
+    branches: [main, master]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Dockerfile'
+      - 'config/**'
+      - '.github/workflows/e2e.yaml'
   pull_request:
-    branches:
-      - "master"
-      - "main"
+    branches: [main, master]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Dockerfile'
+      - 'config/**'
+      - '.github/workflows/e2e.yaml'
 
 permissions:
   contents: read
@@ -17,23 +29,29 @@ jobs:
   create-cluster:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v4
+
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
+        uses: helm/kind-action@v1.13.0
+
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        uses: docker/setup-buildx-action@v3
+
       - name: Build image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@v6
         with:
           push: false
           load: true
-          tags: docker.io/butlerlabs/cluster-api-control-plane-provider-steward:${{ github.sha }}
-      - name: "Load image into kind cluster"
+          tags: ghcr.io/butlerdotdev/capi-steward:${{ github.sha }}
+
+      - name: Load image into kind cluster
         run: |
-          kind load docker-image --name chart-testing docker.io/butlerlabs/cluster-api-control-plane-provider-steward:$GITHUB_SHA
-      - name: "Setup Kubevirt Infrastructure Stack"
+          kind load docker-image --name chart-testing ghcr.io/butlerdotdev/capi-steward:$GITHUB_SHA
+
+      - name: Setup Kubevirt Infrastructure Stack
         run: |
           # Install Metal LB for exposing Kubevirt based Workload Cluster's Api server
           METALLB_VER=$(curl "https://api.github.com/repos/metallb/metallb/releases/latest" | jq -r ".tag_name")
@@ -68,7 +86,7 @@ jobs:
           kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${KV_VER}/kubevirt-cr.yaml"
           kubectl wait -n kubevirt kv kubevirt --for=condition=Available --timeout=10m
 
-      - name: "Install clusterctl and helm binaries"
+      - name: Install clusterctl and helm binaries
         run: |
           curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.8.4/clusterctl-linux-amd64 -o clusterctl
           sudo chmod +x clusterctl
@@ -80,7 +98,7 @@ jobs:
           ./get_helm.sh
           helm version
 
-      - name: "Setup steward"
+      - name: Setup steward
         run: |
           helm repo add jetstack https://charts.jetstack.io
           helm repo update
@@ -92,21 +110,18 @@ jobs:
             --set installCRDs=true \
             --debug
 
-          helm repo add butlerlabs https://butlerlabs.github.io/charts
-          helm repo update
-          helm install steward butlerlabs/steward -n steward-system --create-namespace --debug \
+          helm install steward oci://ghcr.io/butlerdotdev/charts/steward \
+            -n steward-system --create-namespace --debug \
             --set 'resources=null' --timeout=10m
 
-      - name: "Setup clusterctl config"
+      - name: Setup clusterctl config
         run: |
-          sed -i "s/docker.io\/butlerlabs\/cluster-api-control-plane-provider-steward:.*/docker.io\/butlerlabs\/cluster-api-control-plane-provider-steward:$GITHUB_SHA/g" config/control-plane-components.yaml
+          sed -i "s|ghcr.io/butlerdotdev/capi-steward:.*|ghcr.io/butlerdotdev/capi-steward:$GITHUB_SHA|g" config/control-plane-components.yaml
           mkdir -p ${HOME}/control-plane-steward/v0.11.0/
           cp config/control-plane-components.yaml ${HOME}/control-plane-steward/v0.11.0/
           cp config/metadata.yaml ${HOME}/control-plane-steward/v0.11.0/
 
-          mkdir ~/.cluster-api
-          touch ~/.cluster-api/clusterctl.yaml
-
+          mkdir -p ~/.cluster-api
           cat <<EOF > ~/.cluster-api/clusterctl.yaml
           providers:
           - name: "steward"
@@ -114,45 +129,46 @@ jobs:
             type: "ControlPlaneProvider"
           EOF
 
-      - name: "Install CAPI stack with kubevirt as infra and steward as controlplane providers"
+      - name: Install CAPI stack with kubevirt as infra and steward as controlplane providers
         run: |
           clusterctl init --infrastructure kubevirt --control-plane steward
 
           kubectl wait deploy -n steward-system capi-steward-controller-manager --for=condition=Available --timeout=10m
-          kubectl wait deploy -n capi-kubeadm-bootstrap-system capi-kubeadm-bootstrap-controller-manager  --for=condition=Available --timeout=10m
-          kubectl wait deploy -n capi-system capi-controller-manager  --for=condition=Available --timeout=10m
+          kubectl wait deploy -n capi-kubeadm-bootstrap-system capi-kubeadm-bootstrap-controller-manager --for=condition=Available --timeout=10m
+          kubectl wait deploy -n capi-system capi-controller-manager --for=condition=Available --timeout=10m
+          
           IMAGE=$(kubectl get deploy -n steward-system capi-steward-controller-manager -o yaml | grep image | grep $GITHUB_SHA)
           if [[ $IMAGE != *"$GITHUB_SHA"* ]]; then
             echo "Not using the expected PR image"
             exit 1
           fi
 
-      - name: "Deploy target cluster"
+      - name: Deploy target cluster
         run: |
-            kubectl apply -f .github/workflows/assets/targetcluster-controlplane.yaml
-            kubectl wait cluster capi-quickstart --for=condition=InfrastructureReady --timeout=10m
-            kubectl wait stewardcontrolplane capi-quickstart-kubevirt --for=condition=StewardControlPlaneIsReady --timeout=10m
+          kubectl apply -f .github/workflows/assets/targetcluster-controlplane.yaml
+          kubectl wait cluster capi-quickstart --for=condition=InfrastructureReady --timeout=10m
+          kubectl wait stewardcontrolplane capi-quickstart-kubevirt --for=condition=StewardControlPlaneIsReady --timeout=10m
 
-            kubectl apply -f .github/workflows/assets/targetcluster-workers.yaml
+          kubectl apply -f .github/workflows/assets/targetcluster-workers.yaml
 
-            sleep 30 # sleep for 30sec to machine CR to be created
+          sleep 30 # sleep for 30sec to machine CR to be created
 
-            # wait for kubevirt pod and corresponding capi machine
-            kubectl wait machine -l cluster.x-k8s.io/cluster-name=capi-quickstart --for=condition=InfrastructureReady --timeout=10m
-            kubectl wait pod -l cluster.x-k8s.io/cluster-name=capi-quickstart --for=condition=Ready --timeout=10m
+          # wait for kubevirt pod and corresponding capi machine
+          kubectl wait machine -l cluster.x-k8s.io/cluster-name=capi-quickstart --for=condition=InfrastructureReady --timeout=10m
+          kubectl wait pod -l cluster.x-k8s.io/cluster-name=capi-quickstart --for=condition=Ready --timeout=10m
 
-      - name: "Test target cluster"
+      - name: Test target cluster
         run: |
-            kubectl get secret capi-quickstart-kubevirt-admin-kubeconfig -o json \
+          kubectl get secret capi-quickstart-kubevirt-admin-kubeconfig -o json \
             | jq -r '.data["admin.conf"]' \
             | base64 --decode \
             > targetcluster.kubeconfig
 
-            export KUBECONFIG=targetcluster.kubeconfig
-            kubectl get pods -A
-            kubectl get nodes
-            kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+          export KUBECONFIG=targetcluster.kubeconfig
+          kubectl get pods -A
+          kubectl get nodes
+          kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
-            sleep 30
-            kubectl get pods -A
-            kubectl wait nodes -l kubernetes.io/os=linux --for=condition=Ready
+          sleep 30
+          kubectl get pods -A
+          kubectl wait nodes -l kubernetes.io/os=linux --for=condition=Ready
