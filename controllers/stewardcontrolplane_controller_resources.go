@@ -111,7 +111,10 @@ func (r *StewardControlPlaneReconciler) createOrUpdateCertificateAuthority(ctx c
 				corev1.TLSCertKey:       crt,
 				corev1.TLSPrivateKeyKey: key,
 			}
-			capiCA.Type = capiv1beta1.ClusterSecretType
+			// Only set Type on creation - Secret types are immutable
+			if capiCA.CreationTimestamp.IsZero() {
+				capiCA.Type = capiv1beta1.ClusterSecretType
+			}
 
 			return controllerutil.SetControllerReference(&scp, capiCA, r.client.Scheme())
 		})
@@ -170,7 +173,10 @@ func (r *StewardControlPlaneReconciler) createOrUpdateKubeconfig(ctx context.Con
 			capiAdminKubeconfig.Data = map[string][]byte{
 				"value": value,
 			}
-			capiAdminKubeconfig.Type = capiv1beta1.ClusterSecretType
+			// Only set Type on creation - Secret types are immutable
+			if capiAdminKubeconfig.CreationTimestamp.IsZero() {
+				capiAdminKubeconfig.Type = capiv1beta1.ClusterSecretType
+			}
 
 			return controllerutil.SetControllerReference(&scp, capiAdminKubeconfig, r.client.Scheme())
 		})
