@@ -7391,6 +7391,21 @@ spec:
                                 description: Defines the Ingress Class for the Ingress
                                   object.
                                 type: string
+                              controllerType:
+                                description: |-
+                                  ControllerType specifies the ingress controller type for automatic TLS passthrough configuration.
+                                  Supported values: "haproxy", "nginx", "traefik", "generic"
+                                  - haproxy: Uses haproxy.org/ssl-passthrough annotation
+                                  - nginx: Uses nginx.ingress.kubernetes.io/ssl-passthrough annotation
+                                  - traefik: Creates IngressRouteTCP instead of standard Ingress
+                                  - generic: No automatic annotations, use extraAnnotations for custom configuration
+                                  If not specified, defaults to "generic".
+                                enum:
+                                - haproxy
+                                - nginx
+                                - traefik
+                                - generic
+                                type: string
                               extraAnnotations:
                                 additionalProperties:
                                   type: string

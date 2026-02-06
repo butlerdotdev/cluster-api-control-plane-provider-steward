@@ -108,6 +108,7 @@ require (
 )
 
 replace (
+	github.com/butlerdotdev/steward => ../steward
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.34.0
 	k8s.io/apiserver => k8s.io/apiserver v0.34.0
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.34.0

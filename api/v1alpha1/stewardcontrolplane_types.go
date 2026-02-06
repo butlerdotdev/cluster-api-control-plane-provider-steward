@@ -38,6 +38,16 @@ type IngressComponent struct {
 	// +kubebuilder:required
 	// +kubebuilder:validation:MinLength=1
 	Hostname string `json:"hostname"`
+	// ControllerType specifies the ingress controller type for automatic TLS passthrough configuration.
+	// Supported values: "haproxy", "nginx", "traefik", "generic"
+	// - haproxy: Uses haproxy.org/ssl-passthrough annotation
+	// - nginx: Uses nginx.ingress.kubernetes.io/ssl-passthrough annotation
+	// - traefik: Creates IngressRouteTCP instead of standard Ingress
+	// - generic: No automatic annotations, use extraAnnotations for custom configuration
+	// If not specified, defaults to "generic".
+	// +kubebuilder:validation:Enum=haproxy;nginx;traefik;generic
+	// +optional
+	ControllerType string `json:"controllerType,omitempty"`
 	// Defines the extra labels for the Ingress object.
 	ExtraLabels map[string]string `json:"extraLabels,omitempty"`
 	// Defines the extra annotations for the Ingress object.

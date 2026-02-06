@@ -167,6 +167,7 @@ func (r *StewardControlPlaneReconciler) createOrUpdateTenantControlPlane(ctx con
 					},
 					IngressClassName: scp.Spec.Network.Ingress.ClassName,
 					Hostname:         scp.Spec.Network.Ingress.Hostname,
+					ControllerType:   scp.Spec.Network.Ingress.ControllerType,
 				}
 				// In the case of enabled ingress, adding the FQDN to the CertSANs
 				if tcp.Spec.NetworkProfile.CertSANs == nil {
