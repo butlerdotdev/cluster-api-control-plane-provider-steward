@@ -15,8 +15,10 @@ linters:
     - modernize
     - noinlineerr
     - paralleltest
+    - nolintlint
     - testpackage
     - wsl
+    - wsl-v5
   settings:
     goheader:
       template: |-
