@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
 // ControlPlaneComponent allows the customization for the given component of the control plane.
@@ -37,10 +38,41 @@ type IngressComponent struct {
 	// +kubebuilder:required
 	// +kubebuilder:validation:MinLength=1
 	Hostname string `json:"hostname"`
+	// ControllerType specifies the ingress controller type for automatic TLS passthrough configuration.
+	// Supported values: "haproxy", "nginx", "traefik", "generic"
+	// - haproxy: Uses haproxy.org/ssl-passthrough annotation
+	// - nginx: Uses nginx.ingress.kubernetes.io/ssl-passthrough annotation
+	// - traefik: Creates IngressRouteTCP instead of standard Ingress
+	// - generic: No automatic annotations, use extraAnnotations for custom configuration
+	// If not specified, defaults to "generic".
+	// +kubebuilder:validation:Enum=haproxy;nginx;traefik;generic
+	// +optional
+	ControllerType string `json:"controllerType,omitempty"`
 	// Defines the extra labels for the Ingress object.
 	ExtraLabels map[string]string `json:"extraLabels,omitempty"`
 	// Defines the extra annotations for the Ingress object.
 	// Useful if you need to define TLS/SSL passthrough, or other Ingress Controller-specific options.
+	ExtraAnnotations map[string]string `json:"extraAnnotations,omitempty"`
+}
+
+// GatewayComponent configures Gateway API exposure for the control plane.
+// When specified, Steward creates a TLSRoute to expose the tenant API server
+// through a Gateway resource, enabling L4 TLS passthrough routing.
+type GatewayComponent struct {
+	// ParentRefs defines the Gateway parent references for TLS routing.
+	// Do not specify port or sectionName; these are set automatically by Steward.
+	// +optional
+	ParentRefs []gatewayv1.ParentReference `json:"parentRefs,omitempty"`
+	// Hostname is used as the TLSRoute hostname for Gateway API routing.
+	// When using a Gateway the hostname is automatically added to the Certificate SANs.
+	// +kubebuilder:required
+	// +kubebuilder:validation:MinLength=1
+	Hostname string `json:"hostname"`
+	// ExtraLabels defines extra labels for the TLSRoute object.
+	// +optional
+	ExtraLabels map[string]string `json:"extraLabels,omitempty"`
+	// ExtraAnnotations defines extra annotations for the TLSRoute object.
+	// +optional
 	ExtraAnnotations map[string]string `json:"extraAnnotations,omitempty"`
 }
 
@@ -64,6 +96,7 @@ type LoadBalancerConfig struct {
 // +kubebuilder:validation:XValidation:rule="!has(self.loadBalancerConfig) || !has(self.loadBalancerConfig.loadBalancerSourceRanges) || (size(self.loadBalancerConfig.loadBalancerSourceRanges) == 0 || self.serviceType == 'LoadBalancer')", message="LoadBalancerSourceRanges are supported only with LoadBalancer service type"
 // +kubebuilder:validation:XValidation:rule="!has(self.loadBalancerConfig) || !has(self.loadBalancerConfig.loadBalancerClass) || self.serviceType == 'LoadBalancer'", message="LoadBalancerClass is supported only with LoadBalancer service type"
 // +kubebuilder:validation:XValidation:rule="self.serviceType != 'LoadBalancer' || (oldSelf.serviceType != 'LoadBalancer' && self.serviceType == 'LoadBalancer') || !has(self.loadBalancerConfig) || has(self.loadBalancerConfig) && has(self.loadBalancerConfig.loadBalancerClass) == has(oldSelf.loadBalancerConfig.loadBalancerClass)",message="LoadBalancerClass cannot be set or unset at runtime"
+// +kubebuilder:validation:XValidation:rule="!(has(self.ingress) && has(self.gateway))",message="using both ingress and gateway is not supported"
 
 type NetworkComponent struct {
 	// Optional configuration for the LoadBalancer service that exposes the Steward control plane.
@@ -71,6 +104,10 @@ type NetworkComponent struct {
 	// When specified, the StewardControlPlane will be reachable using an Ingress object
 	// deployed in the management cluster.
 	Ingress *IngressComponent `json:"ingress,omitempty"`
+	// When specified, the StewardControlPlane will be reachable using a Gateway API TLSRoute
+	// deployed in the management cluster.
+	// +optional
+	Gateway *GatewayComponent `json:"gateway,omitempty"`
 	// +kubebuilder:default="LoadBalancer"
 	ServiceType stewardv1alpha1.ServiceType `json:"serviceType,omitempty"`
 	// This field can be used in case of pre-assigned address, such as a VIP,
@@ -123,14 +160,14 @@ type DeploymentComponent struct {
 	// PodAdditionalMetadata defines the additional labels and annotations that must be attached
 	// to the resulting Pods managed by the Deployment.
 	PodAdditionalMetadata     stewardv1alpha1.AdditionalMetadata `json:"podAdditionalMetadata,omitempty"`
-	ServiceAccountName        string                            `json:"serviceAccountName,omitempty"`
-	Strategy                  appsv1.DeploymentStrategy         `json:"strategy,omitempty"`
-	Affinity                  *corev1.Affinity                  `json:"affinity,omitempty"`
-	Tolerations               []corev1.Toleration               `json:"tolerations,omitempty"`
-	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
-	ExtraInitContainers       []corev1.Container                `json:"extraInitContainers,omitempty"`
-	ExtraContainers           []corev1.Container                `json:"extraContainers,omitempty"`
-	ExtraVolumes              []corev1.Volume                   `json:"extraVolumes,omitempty"`
+	ServiceAccountName        string                             `json:"serviceAccountName,omitempty"`
+	Strategy                  appsv1.DeploymentStrategy          `json:"strategy,omitempty"`
+	Affinity                  *corev1.Affinity                   `json:"affinity,omitempty"`
+	Tolerations               []corev1.Toleration                `json:"tolerations,omitempty"`
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint  `json:"topologySpreadConstraints,omitempty"`
+	ExtraInitContainers       []corev1.Container                 `json:"extraInitContainers,omitempty"`
+	ExtraContainers           []corev1.Container                 `json:"extraContainers,omitempty"`
+	ExtraVolumes              []corev1.Volume                    `json:"extraVolumes,omitempty"`
 	// ExternalClusterReference allows defining the target Cluster where the Tenant Control Plane components must be deployed.
 	// When this value is nil, the Cluster API management cluster will be used as a target.
 	// The ExternalClusterReference feature gate must be enabled with one of the available flags.

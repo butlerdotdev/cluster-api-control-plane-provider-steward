@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,19 +54,15 @@ func (r *StewardControlPlaneReconciler) patchControlPlaneEndpoint(ctx context.Co
 		return errors.Wrap(err, "cannot retrieve ControlPlaneEndpoint")
 	}
 
-	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if scopedErr := r.client.Get(ctx, client.ObjectKeyFromObject(controlPlane), controlPlane); scopedErr != nil {
-			return errors.Wrap(scopedErr, "cannot retrieve *v1alpha1.StewardControlPlane")
-		}
+	// Use merge patch to only update the ControlPlaneEndpoint without overwriting other spec fields
+	patch := client.MergeFrom(controlPlane.DeepCopy())
+	controlPlane.Spec.ControlPlaneEndpoint = capiv1beta1.APIEndpoint{
+		Host: endpoint,
+		Port: int32(port), //nolint:gosec
+	}
 
-		controlPlane.Spec.ControlPlaneEndpoint = capiv1beta1.APIEndpoint{
-			Host: endpoint,
-			Port: int32(port), //nolint:gosec
-		}
-
-		return r.client.Update(ctx, controlPlane)
-	}); err != nil {
-		return errors.Wrap(err, "cannot update StewardControlPlane with ControlPlaneEndpoint")
+	if err = r.client.Patch(ctx, controlPlane, patch); err != nil {
+		return errors.Wrap(err, "cannot patch StewardControlPlane with ControlPlaneEndpoint")
 	}
 
 	return nil

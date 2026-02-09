@@ -17,6 +17,7 @@ import (
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	scpv1alpha1 "github.com/butlerdotdev/cluster-api-control-plane-provider-steward/api/v1alpha1"
 	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/pkg/externalclusterreference"
@@ -166,6 +167,7 @@ func (r *StewardControlPlaneReconciler) createOrUpdateTenantControlPlane(ctx con
 					},
 					IngressClassName: scp.Spec.Network.Ingress.ClassName,
 					Hostname:         scp.Spec.Network.Ingress.Hostname,
+					ControllerType:   scp.Spec.Network.Ingress.ControllerType,
 				}
 				// In the case of enabled ingress, adding the FQDN to the CertSANs
 				if tcp.Spec.NetworkProfile.CertSANs == nil {
@@ -181,6 +183,31 @@ func (r *StewardControlPlaneReconciler) createOrUpdateTenantControlPlane(ctx con
 				}
 			} else {
 				tcp.Spec.ControlPlane.Ingress = nil
+			}
+			// Gateway
+			if scp.Spec.Network.Gateway != nil {
+				tcp.Spec.ControlPlane.Gateway = &stewardv1alpha1.GatewaySpec{
+					AdditionalMetadata: stewardv1alpha1.AdditionalMetadata{
+						Labels:      scp.Spec.Network.Gateway.ExtraLabels,
+						Annotations: scp.Spec.Network.Gateway.ExtraAnnotations,
+					},
+					GatewayParentRefs: scp.Spec.Network.Gateway.ParentRefs,
+					Hostname:          gatewayv1.Hostname(scp.Spec.Network.Gateway.Hostname),
+				}
+				// In the case of enabled gateway, adding the FQDN to the CertSANs
+				if tcp.Spec.NetworkProfile.CertSANs == nil {
+					tcp.Spec.NetworkProfile.CertSANs = []string{}
+				}
+
+				if host, _, err := net.SplitHostPort(scp.Spec.Network.Gateway.Hostname); err == nil {
+					// no error means <FQDN>:<PORT>, we need the host variable
+					tcp.Spec.NetworkProfile.CertSANs = append(tcp.Spec.NetworkProfile.CertSANs, host)
+				} else {
+					// No port specification, adding bare entry
+					tcp.Spec.NetworkProfile.CertSANs = append(tcp.Spec.NetworkProfile.CertSANs, scp.Spec.Network.Gateway.Hostname)
+				}
+			} else {
+				tcp.Spec.ControlPlane.Gateway = nil
 			}
 			// LoadBalancer
 			if scp.Spec.Network.LoadBalancerConfig != nil {

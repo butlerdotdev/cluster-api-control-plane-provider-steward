@@ -3,15 +3,22 @@ linters:
   default: all
   disable:
     - depguard
+    - embeddedstructfieldcheck
     - err113
     - exhaustruct
+    - funcorder
     - gochecknoglobals
     - gochecknoinits
+    - gocyclo
     - gomoddirectives
     - lll
+    - modernize
+    - noinlineerr
     - paralleltest
+    - nolintlint
     - testpackage
     - wsl
+    - wsl_v5
   settings:
     goheader:
       template: |-
@@ -41,7 +48,7 @@ formatters:
       sections:
         - standard
         - default
-        - prefix(github.com/clastix/cluster-api-control-plane-provider-kamaji)
+        - prefix(github.com/butlerdotdev/cluster-api-control-plane-provider-steward)
   exclusions:
     generated: lax
     paths:

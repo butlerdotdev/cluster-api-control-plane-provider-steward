@@ -11,7 +11,7 @@ var (
 	TenantControlPlaneAddressReadyConditionType StewardControlPlaneConditionType = "TenantControlPlaneAddressReady"
 	ControlPlaneEndpointPatchedConditionType    StewardControlPlaneConditionType = "ControlPlaneEndpointPatched"
 	InfrastructureClusterPatchedConditionType   StewardControlPlaneConditionType = "InfrastructureClusterPatched"
-	StewardControlPlaneInitializedConditionType  StewardControlPlaneConditionType = "StewardControlPlaneIsInitialized"
-	StewardControlPlaneReadyConditionType        StewardControlPlaneConditionType = "StewardControlPlaneIsReady"
+	StewardControlPlaneInitializedConditionType StewardControlPlaneConditionType = "StewardControlPlaneIsInitialized"
+	StewardControlPlaneReadyConditionType       StewardControlPlaneConditionType = "StewardControlPlaneIsReady"
 	KubeadmResourcesCreatedReadyConditionType   StewardControlPlaneConditionType = "KubeadmResourcesCreated"
 )
