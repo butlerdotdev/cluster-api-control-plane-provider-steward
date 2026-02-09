@@ -316,10 +316,42 @@ spec:
                       to route API server traffic through a local proxy, eliminating SNI
                       rewriting requirements for Ingress and Gateway API network modes.
                     properties:
+                      hostAliases:
+                        description: |-
+                          HostAliases provides hostname-to-IP mappings for /etc/hosts injection.
+                          Required for Ingress/Gateway modes where the API server hostname must be
+                          resolved before CoreDNS is available. The tcp-proxy uses hostNetwork,
+                          so it needs these entries to connect to the upstream API server.
+                        items:
+                          description: |-
+                            TCPProxyHostAlias defines a hostname-to-IP mapping for /etc/hosts injection.
+                            Used to resolve hostnames before DNS is available (bootstrap phase).
+                          properties:
+                            hostnames:
+                              description: Hostnames for the IP address.
+                              items:
+                                type: string
+                              type: array
+                            ip:
+                              description: IP address of the host entry.
+                              type: string
+                          required:
+                          - hostnames
+                          - ip
+                          type: object
+                        type: array
                       image:
                         description: |-
                           Image is the container image for the tcp-proxy.
                           Defaults to ghcr.io/butlerdotdev/steward-tcp-proxy:<steward-version>
+                        type: string
+                      internalEndpoint:
+                        description: |-
+                          InternalEndpoint is the direct endpoint for tcp-proxy to reach the API server.
+                          For Ingress/Gateway modes, this should be a management cluster node IP that
+                          is reachable from tenant worker nodes (e.g., "10.40.0.201"). The NodePort
+                          is automatically appended by Steward based on the service configuration.
+                          If not specified, Steward attempts to use the service's LoadBalancer IP.
                         type: string
                       resources:
                         description: Resources defines the compute resources for the tcp-proxy container.
@@ -7015,6 +7047,21 @@ spec:
                       className:
                         description: Defines the Ingress Class for the Ingress object.
                         type: string
+                      controllerType:
+                        description: |-
+                          ControllerType specifies the ingress controller type for automatic TLS passthrough configuration.
+                          Supported values: "haproxy", "nginx", "traefik", "generic"
+                          - haproxy: Uses haproxy.org/ssl-passthrough annotation
+                          - nginx: Uses nginx.ingress.kubernetes.io/ssl-passthrough annotation
+                          - traefik: Creates IngressRouteTCP instead of standard Ingress
+                          - generic: No automatic annotations, use extraAnnotations for custom configuration
+                          If not specified, defaults to "generic".
+                        enum:
+                        - haproxy
+                        - nginx
+                        - traefik
+                        - generic
+                        type: string
                       extraAnnotations:
                         additionalProperties:
                           type: string
@@ -7682,10 +7729,42 @@ spec:
                               to route API server traffic through a local proxy, eliminating SNI
                               rewriting requirements for Ingress and Gateway API network modes.
                             properties:
+                              hostAliases:
+                                description: |-
+                                  HostAliases provides hostname-to-IP mappings for /etc/hosts injection.
+                                  Required for Ingress/Gateway modes where the API server hostname must be
+                                  resolved before CoreDNS is available. The tcp-proxy uses hostNetwork,
+                                  so it needs these entries to connect to the upstream API server.
+                                items:
+                                  description: |-
+                                    TCPProxyHostAlias defines a hostname-to-IP mapping for /etc/hosts injection.
+                                    Used to resolve hostnames before DNS is available (bootstrap phase).
+                                  properties:
+                                    hostnames:
+                                      description: Hostnames for the IP address.
+                                      items:
+                                        type: string
+                                      type: array
+                                    ip:
+                                      description: IP address of the host entry.
+                                      type: string
+                                  required:
+                                  - hostnames
+                                  - ip
+                                  type: object
+                                type: array
                               image:
                                 description: |-
                                   Image is the container image for the tcp-proxy.
                                   Defaults to ghcr.io/butlerdotdev/steward-tcp-proxy:<steward-version>
+                                type: string
+                              internalEndpoint:
+                                description: |-
+                                  InternalEndpoint is the direct endpoint for tcp-proxy to reach the API server.
+                                  For Ingress/Gateway modes, this should be a management cluster node IP that
+                                  is reachable from tenant worker nodes (e.g., "10.40.0.201"). The NodePort
+                                  is automatically appended by Steward based on the service configuration.
+                                  If not specified, Steward attempts to use the service's LoadBalancer IP.
                                 type: string
                               resources:
                                 description: Resources defines the compute resources for the tcp-proxy container.
@@ -14365,6 +14444,21 @@ spec:
                             properties:
                               className:
                                 description: Defines the Ingress Class for the Ingress object.
+                                type: string
+                              controllerType:
+                                description: |-
+                                  ControllerType specifies the ingress controller type for automatic TLS passthrough configuration.
+                                  Supported values: "haproxy", "nginx", "traefik", "generic"
+                                  - haproxy: Uses haproxy.org/ssl-passthrough annotation
+                                  - nginx: Uses nginx.ingress.kubernetes.io/ssl-passthrough annotation
+                                  - traefik: Creates IngressRouteTCP instead of standard Ingress
+                                  - generic: No automatic annotations, use extraAnnotations for custom configuration
+                                  If not specified, defaults to "generic".
+                                enum:
+                                - haproxy
+                                - nginx
+                                - traefik
+                                - generic
                                 type: string
                               extraAnnotations:
                                 additionalProperties:
