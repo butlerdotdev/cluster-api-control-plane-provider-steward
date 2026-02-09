@@ -3,7 +3,7 @@ module github.com/butlerdotdev/cluster-api-control-plane-provider-steward
 go 1.25.0
 
 require (
-	github.com/butlerdotdev/steward v0.1.0-alpha
+	github.com/butlerdotdev/steward v0.2.0
 	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 	github.com/pkg/errors v0.9.1
@@ -108,7 +108,6 @@ require (
 )
 
 replace (
-	github.com/butlerdotdev/steward => ../steward
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.34.0
 	k8s.io/apiserver => k8s.io/apiserver v0.34.0
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.34.0
