@@ -20,3 +20,4 @@ bin/*
 # Tilt files.
 .tiltbuild
 CLAUDE.md
+manager
