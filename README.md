@@ -1,98 +1,172 @@
-![Steward Cluster API Control Plane provider](./assets/cover.png)
-
-## Steward Cluster API Control Plane provider
+# Steward Cluster API Control Plane Provider
 
 <p align="left">
-  <img src="https://img.shields.io/github/license/clastix/cluster-api-control-plane-provider-kamaji"/>
-  <img src="https://img.shields.io/github/go-mod/go-version/clastix/cluster-api-control-plane-provider-kamaji"/>
-  <img src="https://goreportcard.com/badge/github.com/clastix/kamaji">
-  <a href="https://github.com/clastix/kamaji/releases"><img src="https://img.shields.io/github/v/release/clastix/cluster-api-control-plane-provider-kamaji"/></a>
-  <a href="https://kubernetes.slack.com/archives/C03GLTTMWNN"><img alt="#kamaji on Kubernetes Slack" src="https://img.shields.io/badge/slack-@kubernetes/kamaji-blue.svg?logo=slack"/></a>
+  <a href="https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/blob/master/LICENSE"><img src="https://img.shields.io/github/license/butlerdotdev/cluster-api-control-plane-provider-steward" alt="License"></a>
+  <img src="https://img.shields.io/github/go-mod/go-version/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Go Version">
+  <a href="https://goreportcard.com/report/github.com/butlerdotdev/cluster-api-control-plane-provider-steward"><img src="https://goreportcard.com/badge/github.com/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Go Report Card"></a>
+  <a href="https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/releases"><img src="https://img.shields.io/github/v/release/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Release"></a>
 </p>
 
-The Steward Control Plane provider implementation of the [Cluster Management API](https://cluster-api.sigs.k8s.io/).
+The Steward Control Plane Provider is a [Cluster API](https://cluster-api.sigs.k8s.io/) implementation that bridges CAPI with [Steward](https://github.com/butlerdotdev/steward) hosted control planes.
 
-### 🤔 What is Steward?
+## What is This?
 
-[Steward](http://github.com/clastix/kamaji) is an Open-Source project offering hosted Kubernetes control planes.
-tl;dr; the Control Plane is running in a management cluster as regular pods.
+This provider enables Cluster API to use Steward's TenantControlPlane resources as the control plane for CAPI-managed clusters. Instead of provisioning dedicated control plane nodes, the control plane runs as pods in a management cluster, managed by Steward.
 
-You can refer to the [official documentation website](https://kamaji.clastix.io/).
+**How it works:**
 
-### 📄 Documentation
+1. CAPI creates a `Cluster` resource referencing a `StewardControlPlane`
+2. This provider creates a Steward `TenantControlPlane` resource
+3. Steward provisions the hosted control plane (apiserver, controller-manager, scheduler as pods)
+4. Worker nodes from any CAPI infrastructure provider join the hosted control plane
+5. The provider synchronizes status between CAPI and Steward
 
-The Steward Cluster API Control Plane provider documentation is referenced in the [Steward documentation](https://kamaji.clastix.io/cluster-api/) website.
+## What is Steward?
 
-### 🚀 Supported CAPI infrastructure providers
+[Steward](https://github.com/butlerdotdev/steward) is an open-source project offering hosted Kubernetes control planes. The control plane runs in a management cluster as regular pods, enabling efficient multi-tenancy and reduced infrastructure overhead.
 
-| Infrastructure Provider                                                                                                                       | Version           |
-|-----------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
-| [AWS](https://github.com/kubernetes-sigs/cluster-api-provider-aws) ([technical considerations](docs/providers-aws.md))                        | += v2.4.0         |
-| [Equinix/Packet](https://github.com/kubernetes-sigs/cluster-api-provider-packet) ([technical considerations](docs/providers-packet.md))       | += v0.7.2         |
-| [Hetzner](https://github.com/syself/cluster-api-provider-hetzner)([technical considerations](docs/providers-hetzner.md))                      | += v1.0.0-beta.30 |
-| [KubeVirt](https://github.com/kubernetes-sigs/cluster-api-provider-kubevirt) ([technical considerations](docs/providers-kubevirt.md))         | += 0.1.7          |
-| [Metal³](https://github.com/metal3-io/cluster-api-provider-metal3) ([technical considerations](docs/providers-metal3.md))                     | += 1.4.0          |
-| [Nutanix](https://github.com/nutanix-cloud-native/cluster-api-provider-nutanix) ([technical considerations](docs/providers-nutanix.md))       | += 1.2.4          |
-| [OpenStack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack) ([technical considerations](docs/providers-openstack.md))      | += 0.8.0          |
-| [Tinkerbell](https://github.com/tinkerbell/cluster-api-provider-tinkerbell) ([technical considerations](docs/providers-tinkerbell.md))        | += v0.5.2         |
-| [vSphere](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) ([technical considerations](docs/providers-vsphere.md))            | += 1.7.0          |
-| [IONOS Cloud](https://github.com/ionos-cloud/cluster-api-provider-ionoscloud) ([technical considerations](docs/providers-ionoscloud.md))      | += v0.3.0         |
-| [Proxmox by IONOS Cloud](https://github.com/ionos-cloud/cluster-api-provider-proxmox) ([technical considerations](docs/providers-proxmox.md)) | += v0.6.0         |
-| [Azure](https://github.com/kubernetes-sigs/cluster-api-provider-azure) ([technical considerations](docs/providers-azure.md))                  | += v1.18.0        |
+Steward is a community-governed fork of Kamaji, maintained by Butler Labs and the open source community. See the [Steward documentation](https://docs.butlerlabs.dev/steward/) for more information.
 
-> Are you looking for further integrations?
-> Please, engage with the community on the [#kamaji](https://kubernetes.slack.com/archives/C03GLTTMWNN) Kubernetes Slack
-> workspace channel, or using the **GitHub Discussion** section.
+## StewardControlPlane Example
 
-### 🛠 Development
+```yaml
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: StewardControlPlane
+metadata:
+  name: my-cluster-control-plane
+  namespace: default
+spec:
+  version: "1.29.0"
+  replicas: 2
+  dataStoreName: default
+  network:
+    serviceType: LoadBalancer
+    certSANs:
+      - "my-cluster.example.com"
+  kubelet:
+    preferredAddressTypes:
+      - InternalIP
+      - ExternalIP
+      - Hostname
+    cgroupfs: systemd
+  addons:
+    coreDNS: {}
+    kubeProxy: {}
+```
+
+## CAPI Cluster Example
+
+Complete example using StewardControlPlane with a CAPI infrastructure provider:
+
+```yaml
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: my-cluster
+  namespace: default
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 10.244.0.0/16
+    services:
+      cidrBlocks:
+        - 10.96.0.0/16
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+    kind: StewardControlPlane
+    name: my-cluster-control-plane
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: <InfrastructureCluster>
+    name: my-cluster
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: StewardControlPlane
+metadata:
+  name: my-cluster-control-plane
+  namespace: default
+spec:
+  version: "1.29.0"
+  replicas: 2
+  dataStoreName: default
+  network:
+    serviceType: LoadBalancer
+  addons:
+    coreDNS: {}
+    kubeProxy: {}
+```
+
+## Supported CAPI Infrastructure Providers
+
+| Infrastructure Provider | Version | Notes |
+|------------------------|---------|-------|
+| [AWS](https://github.com/kubernetes-sigs/cluster-api-provider-aws) | >= v2.4.0 | [Technical considerations](docs/providers-aws.md) |
+| [Azure](https://github.com/kubernetes-sigs/cluster-api-provider-azure) | >= v1.18.0 | [Technical considerations](docs/providers-azure.md) |
+| [Equinix/Packet](https://github.com/kubernetes-sigs/cluster-api-provider-packet) | >= v0.7.2 | [Technical considerations](docs/providers-packet.md) |
+| [Hetzner](https://github.com/syself/cluster-api-provider-hetzner) | >= v1.0.0-beta.30 | [Technical considerations](docs/providers-hetzner.md) |
+| [IONOS Cloud](https://github.com/ionos-cloud/cluster-api-provider-ionoscloud) | >= v0.3.0 | [Technical considerations](docs/providers-ionoscloud.md) |
+| [KubeVirt](https://github.com/kubernetes-sigs/cluster-api-provider-kubevirt) | >= 0.1.7 | [Technical considerations](docs/providers-kubevirt.md) |
+| [Metal3](https://github.com/metal3-io/cluster-api-provider-metal3) | >= 1.4.0 | [Technical considerations](docs/providers-metal3.md) |
+| [Nutanix](https://github.com/nutanix-cloud-native/cluster-api-provider-nutanix) | >= 1.2.4 | [Technical considerations](docs/providers-nutanix.md) |
+| [OpenStack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack) | >= 0.8.0 | [Technical considerations](docs/providers-openstack.md) |
+| [Proxmox](https://github.com/ionos-cloud/cluster-api-provider-proxmox) | >= v0.6.0 | [Technical considerations](docs/providers-proxmox.md) |
+| [Tinkerbell](https://github.com/tinkerbell/cluster-api-provider-tinkerbell) | >= v0.5.2 | [Technical considerations](docs/providers-tinkerbell.md) |
+| [vSphere](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) | >= 1.7.0 | [Technical considerations](docs/providers-vsphere.md) |
+
+Looking for additional integrations? Open a [GitHub Discussion](https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/discussions) or [issue](https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/issues).
+
+## Prerequisites
+
+- Kubernetes management cluster (v1.28+)
+- [Steward](https://github.com/butlerdotdev/steward) installed and configured with a DataStore
+- [Cluster API](https://cluster-api.sigs.k8s.io/) core components (v1.6+)
+- A supported CAPI infrastructure provider
+
+## Installation
+
+### Using clusterctl
+
+```bash
+clusterctl init --control-plane steward
+```
+
+### Using Helm
+
+```bash
+helm repo add butler https://charts.butlerlabs.dev
+helm install capi-steward butler/capi-steward -n capi-system
+```
+
+## Development
 
 This document describes how to use kind and [Tilt](https://tilt.dev/) for a simplified workflow that offers easy deployments and rapid iterative builds.
-Before the next steps, make sure the initial setup for development environment step is complete.
 
-1. Create a `kind` cluster according to the [CAPI Infrastructure Provider requirements](https://cluster-api.sigs.k8s.io/user/quick-start#install-andor-configure-a-kubernetes-cluster) you're planning to use
+1. Create a `kind` cluster according to the [CAPI Infrastructure Provider requirements](https://cluster-api.sigs.k8s.io/user/quick-start#install-andor-configure-a-kubernetes-cluster)
 2. [Install Cluster API](https://cluster-api.sigs.k8s.io/user/quick-start#initialize-the-management-cluster) with the `clusterctl` CLI
-3. Install Steward (for the sake of simplicity, we suggest [Helm](https://github.com/clastix/kamaji/tree/master/charts/kamaji#install-kamaji))
-4. Get the source of the Steward Control Plane provider and place in your desired `LOCATION`
-5. Run the _Steward Cluster API Control Plane Provider_ as you prefer, as well as with `dlv` to debug it 
+3. Install [Steward](https://github.com/butlerdotdev/steward) using Helm
+4. Clone this repository
+5. Run the provider with `make run` or use `dlv` for debugging
 6. Run Tilt by issuing `tilt up`
-7. You have a full development environment
 
-### 🏷️ Versioning
+## Versioning
 
-Versioning adheres to the [Semantic Versioning](http://semver.org/) principles.
-A full list of the available releases are available in the GitHub repository's [**Release** section](https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases).
+Versioning adheres to [Semantic Versioning](http://semver.org/) principles. A full list of releases is available in the [Releases](https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/releases) section.
 
-### 🤝 Contributions
+## Contributing
 
-Contributions are highly appreciated and very welcomed!
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-In case of bugs, please, check if the issue has been already opened by checking the [GitHub Issues](https://github.com/clastix/cluster-api-control-plane-provider-kamaji/issues) section.
-In case it isn't, you can open a new one: a detailed report will help us to replicate it, assess it, and work on a fix.
+- Check existing [issues](https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/issues) before opening a new one
+- For bugs, provide a detailed report to help replicate and assess the issue
+- Commit messages follow [conventional commits](https://www.conventionalcommits.org/)
 
-You can express your intention in working on the fix on your own.
-The commit messages are checked according to the described [semantics](https://github.com/projectcapsule/capsule/blob/main/CONTRIBUTING.md#semantics).
-Commits are used to generate the changelog, and their author will be referenced in it.
+## Documentation
 
-### 📝 License
+- [Steward Documentation](https://docs.butlerlabs.dev/steward/)
+- [Cluster API Documentation](https://cluster-api.sigs.k8s.io/)
+- [Provider Technical Considerations](docs/)
 
-The Steward Cluster API Control Plane provider is licensed under Apache 2.0.
-The code is provided as-is with no warranties.
+## License
 
-### 📄 Steward compatibility
-
-As of July 2024, CLASTIX Labs organisation does no longer provide stable release artefacts in favour of [edge releases](https://kamaji.clastix.io/reference/versioning/#edge-releases).
-
-Although CLASTIX Labs strives to provide production-grade artefacts even for edge releases,
-starting from v0.12.0 the Steward Cluster API Control Plane provider will not use a stable version pinning in favour of edge releases.
-
-To ensure a perfect compatibility and a production grade implementation between Steward and the Cluster API Control Plane provider,
-we suggest getting in touch with CLASTIX Labs to achieve commercial support.
-
-### 🛟 Commercial Support
-
-[CLASTIX](https://clastix.io/) is the commercial company behind Steward and the Cluster API Control Plane provider.
-
-If you're looking to run Steward in production and would like to learn more, **CLASTIX** can help by offering [Open Source support plans](https://clastix.io/support),
-as well as providing a comprehensive Enterprise Platform named [CLASTIX Enterprise Platform](https://clastix.cloud/), built on top of the Steward and [Capsule](https://capsule.clastix.io/) project (now donated to CNCF as a Sandbox project).
-
-Feel free to get in touch with the provided [Contact form](https://clastix.io/contact).
+Apache License 2.0. See [LICENSE](LICENSE) for details.
