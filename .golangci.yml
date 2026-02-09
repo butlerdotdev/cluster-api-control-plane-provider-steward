@@ -18,7 +18,7 @@ linters:
     - nolintlint
     - testpackage
     - wsl
-    - wsl-v5
+    - wsl_v5
   settings:
     goheader:
       template: |-
