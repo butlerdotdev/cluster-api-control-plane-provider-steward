@@ -45,6 +45,21 @@ func (r *StewardControlPlaneReconciler) controlPlaneEndpoint(controlPlane *v1alp
 		}
 	}
 
+	if gateway := controlPlane.Spec.Network.Gateway; gateway != nil {
+		hostname := gateway.Hostname
+		if len(strings.Split(hostname, ":")) == 1 {
+			hostname += ":6443"
+		}
+
+		if endpoint, strPort, err = net.SplitHostPort(hostname); err != nil {
+			return "", 0, errors.Wrap(err, "cannot split the Steward Gateway hostname host port pair")
+		}
+
+		if port, pErr = strconv.ParseInt(strPort, 10, 64); pErr != nil {
+			return "", 0, errors.Wrap(pErr, "cannot convert Steward Gateway hostname port pair")
+		}
+	}
+
 	return endpoint, port, nil
 }
 
