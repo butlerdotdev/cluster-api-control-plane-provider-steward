@@ -20,6 +20,11 @@ import (
 	"github.com/butlerdotdev/cluster-api-control-plane-provider-steward/api/v1alpha1"
 )
 
+const (
+	defaultIngressPort = 443
+	defaultGatewayPort = 6443
+)
+
 func (r *StewardControlPlaneReconciler) controlPlaneEndpoint(controlPlane *v1alpha1.StewardControlPlane, statusEndpoint string) (string, int64, error) {
 	endpoint, strPort, err := net.SplitHostPort(statusEndpoint)
 	if err != nil {
@@ -32,14 +37,14 @@ func (r *StewardControlPlaneReconciler) controlPlaneEndpoint(controlPlane *v1alp
 	}
 
 	if ingress := controlPlane.Spec.Network.Ingress; ingress != nil {
-		endpoint, port, err = parseHostnameWithDefault(ingress.Hostname, 443, "Ingress")
+		endpoint, port, err = parseHostnameWithDefault(ingress.Hostname, defaultIngressPort, "Ingress")
 		if err != nil {
 			return "", 0, err
 		}
 	}
 
 	if gateway := controlPlane.Spec.Network.Gateway; gateway != nil {
-		endpoint, port, err = parseHostnameWithDefault(gateway.Hostname, 6443, "Gateway")
+		endpoint, port, err = parseHostnameWithDefault(gateway.Hostname, defaultGatewayPort, "Gateway")
 		if err != nil {
 			return "", 0, err
 		}
