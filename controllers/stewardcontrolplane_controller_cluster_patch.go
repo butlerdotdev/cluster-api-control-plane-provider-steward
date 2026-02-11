@@ -32,35 +32,40 @@ func (r *StewardControlPlaneReconciler) controlPlaneEndpoint(controlPlane *v1alp
 	}
 
 	if ingress := controlPlane.Spec.Network.Ingress; ingress != nil {
-		if len(strings.Split(ingress.Hostname, ":")) == 1 {
-			ingress.Hostname += ":443"
-		}
-
-		if endpoint, strPort, err = net.SplitHostPort(ingress.Hostname); err != nil {
-			return "", 0, errors.Wrap(err, "cannot split the Steward Ingress hostname host port pair")
-		}
-
-		if port, pErr = strconv.ParseInt(strPort, 10, 64); pErr != nil {
-			return "", 0, errors.Wrap(pErr, "cannot convert Steward Ingress hostname port pair")
+		endpoint, port, err = parseHostnameWithDefault(ingress.Hostname, 443, "Ingress")
+		if err != nil {
+			return "", 0, err
 		}
 	}
 
 	if gateway := controlPlane.Spec.Network.Gateway; gateway != nil {
-		hostname := gateway.Hostname
-		if len(strings.Split(hostname, ":")) == 1 {
-			hostname += ":6443"
-		}
-
-		if endpoint, strPort, err = net.SplitHostPort(hostname); err != nil {
-			return "", 0, errors.Wrap(err, "cannot split the Steward Gateway hostname host port pair")
-		}
-
-		if port, pErr = strconv.ParseInt(strPort, 10, 64); pErr != nil {
-			return "", 0, errors.Wrap(pErr, "cannot convert Steward Gateway hostname port pair")
+		endpoint, port, err = parseHostnameWithDefault(gateway.Hostname, 6443, "Gateway")
+		if err != nil {
+			return "", 0, err
 		}
 	}
 
 	return endpoint, port, nil
+}
+
+// parseHostnameWithDefault splits a hostname into host and port, applying a
+// default port when none is specified.
+func parseHostnameWithDefault(hostname string, defaultPort int, label string) (string, int64, error) {
+	if len(strings.Split(hostname, ":")) == 1 {
+		hostname += ":" + strconv.Itoa(defaultPort)
+	}
+
+	host, strPort, err := net.SplitHostPort(hostname)
+	if err != nil {
+		return "", 0, errors.Wrapf(err, "cannot split the Steward %s hostname host port pair", label)
+	}
+
+	port, err := strconv.ParseInt(strPort, 10, 64)
+	if err != nil {
+		return "", 0, errors.Wrapf(err, "cannot convert Steward %s hostname port pair", label)
+	}
+
+	return host, port, nil
 }
 
 func (r *StewardControlPlaneReconciler) patchControlPlaneEndpoint(ctx context.Context, controlPlane *v1alpha1.StewardControlPlane, hostPort string) error {
