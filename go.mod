@@ -3,7 +3,7 @@ module github.com/butlerdotdev/cluster-api-control-plane-provider-steward
 go 1.25.0
 
 require (
-	github.com/butlerdotdev/steward v0.2.3-0.20260211204002-4cca3bc85696
+	github.com/butlerdotdev/steward v0.3.0
 	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 	github.com/pkg/errors v0.9.1
