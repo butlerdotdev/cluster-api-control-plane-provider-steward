@@ -413,6 +413,119 @@ spec:
                             type: object
                         type: object
                     type: object
+                  workerBootstrap:
+                    description: WorkerBootstrap configures immutable OS worker node bootstrap.
+                    properties:
+                      allowedSubnets:
+                        description: |-
+                          AllowedSubnets restricts which worker IP ranges are valid for CSR approval.
+                          CIDR format (e.g., "10.40.0.0/22"). If empty, all IPs are allowed.
+                        items:
+                          type: string
+                        type: array
+                      csrApproval:
+                        default:
+                          autoApprove: true
+                        description: CSRApproval configures automatic CSR approval for worker kubelet-serving certs.
+                        properties:
+                          autoApprove:
+                            default: true
+                            description: AutoApprove enables automatic approval of kubelet-serving CSRs from workers.
+                            type: boolean
+                        required:
+                        - autoApprove
+                        type: object
+                      provider:
+                        allOf:
+                        - enum:
+                          - talos
+                        - enum:
+                          - talos
+                        description: Provider specifies the immutable OS bootstrap provider.
+                        type: string
+                      talos:
+                        description: Talos-specific configuration. Required when provider is "talos".
+                        properties:
+                          certSANs:
+                            description: CertSANs adds extra Subject Alternative Names to the trustd server certificate.
+                            items:
+                              type: string
+                            type: array
+                          image:
+                            default: ghcr.io/butlerdotdev/steward-trustd
+                            description: Image is the container image for steward-trustd.
+                            type: string
+                          imageTag:
+                            description: ImageTag is the image tag for steward-trustd.
+                            type: string
+                          port:
+                            default: 50001
+                            description: Port for the trustd gRPC service.
+                            format: int32
+                            type: integer
+                          resources:
+                            description: Resources for the trustd container.
+                            properties:
+                              claims:
+                                description: |-
+                                  Claims lists the names of resources, defined in spec.resourceClaims,
+                                  that are used by this container.
+
+                                  This field depends on the
+                                  DynamicResourceAllocation feature gate.
+
+                                  This field is immutable. It can only be set for containers.
+                                items:
+                                  description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                                  properties:
+                                    name:
+                                      description: |-
+                                        Name must match the name of one entry in pod.spec.resourceClaims of
+                                        the Pod where this field is used. It makes that resource available
+                                        inside a container.
+                                      type: string
+                                    request:
+                                      description: |-
+                                        Request is the name chosen for a request in the referenced claim.
+                                        If empty, everything from the claim is made available, otherwise
+                                        only the result of this request.
+                                      type: string
+                                  required:
+                                  - name
+                                  type: object
+                                type: array
+                                x-kubernetes-list-map-keys:
+                                - name
+                                x-kubernetes-list-type: map
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                description: |-
+                                  Limits describes the maximum amount of compute resources allowed.
+                                  More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                description: |-
+                                  Requests describes the minimum amount of compute resources required.
+                                  If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                                  otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                                  More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                                type: object
+                            type: object
+                        type: object
+                    required:
+                    - provider
+                    type: object
                 type: object
               admissionControllers:
                 description: |-
@@ -7825,6 +7938,119 @@ spec:
                                       More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                     type: object
                                 type: object
+                            type: object
+                          workerBootstrap:
+                            description: WorkerBootstrap configures immutable OS worker node bootstrap.
+                            properties:
+                              allowedSubnets:
+                                description: |-
+                                  AllowedSubnets restricts which worker IP ranges are valid for CSR approval.
+                                  CIDR format (e.g., "10.40.0.0/22"). If empty, all IPs are allowed.
+                                items:
+                                  type: string
+                                type: array
+                              csrApproval:
+                                default:
+                                  autoApprove: true
+                                description: CSRApproval configures automatic CSR approval for worker kubelet-serving certs.
+                                properties:
+                                  autoApprove:
+                                    default: true
+                                    description: AutoApprove enables automatic approval of kubelet-serving CSRs from workers.
+                                    type: boolean
+                                required:
+                                - autoApprove
+                                type: object
+                              provider:
+                                allOf:
+                                - enum:
+                                  - talos
+                                - enum:
+                                  - talos
+                                description: Provider specifies the immutable OS bootstrap provider.
+                                type: string
+                              talos:
+                                description: Talos-specific configuration. Required when provider is "talos".
+                                properties:
+                                  certSANs:
+                                    description: CertSANs adds extra Subject Alternative Names to the trustd server certificate.
+                                    items:
+                                      type: string
+                                    type: array
+                                  image:
+                                    default: ghcr.io/butlerdotdev/steward-trustd
+                                    description: Image is the container image for steward-trustd.
+                                    type: string
+                                  imageTag:
+                                    description: ImageTag is the image tag for steward-trustd.
+                                    type: string
+                                  port:
+                                    default: 50001
+                                    description: Port for the trustd gRPC service.
+                                    format: int32
+                                    type: integer
+                                  resources:
+                                    description: Resources for the trustd container.
+                                    properties:
+                                      claims:
+                                        description: |-
+                                          Claims lists the names of resources, defined in spec.resourceClaims,
+                                          that are used by this container.
+
+                                          This field depends on the
+                                          DynamicResourceAllocation feature gate.
+
+                                          This field is immutable. It can only be set for containers.
+                                        items:
+                                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                                          properties:
+                                            name:
+                                              description: |-
+                                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                                the Pod where this field is used. It makes that resource available
+                                                inside a container.
+                                              type: string
+                                            request:
+                                              description: |-
+                                                Request is the name chosen for a request in the referenced claim.
+                                                If empty, everything from the claim is made available, otherwise
+                                                only the result of this request.
+                                              type: string
+                                          required:
+                                          - name
+                                          type: object
+                                        type: array
+                                        x-kubernetes-list-map-keys:
+                                        - name
+                                        x-kubernetes-list-type: map
+                                      limits:
+                                        additionalProperties:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        description: |-
+                                          Limits describes the maximum amount of compute resources allowed.
+                                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                                        type: object
+                                      requests:
+                                        additionalProperties:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        description: |-
+                                          Requests describes the minimum amount of compute resources required.
+                                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                                        type: object
+                                    type: object
+                                type: object
+                            required:
+                            - provider
                             type: object
                         type: object
                       admissionControllers:
