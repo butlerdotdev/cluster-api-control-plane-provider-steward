@@ -1,13 +1,24 @@
-# Steward Cluster API Control Plane Provider
-
-<p align="left">
-  <a href="https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/blob/master/LICENSE"><img src="https://img.shields.io/github/license/butlerdotdev/cluster-api-control-plane-provider-steward" alt="License"></a>
-  <img src="https://img.shields.io/github/go-mod/go-version/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Go Version">
-  <a href="https://goreportcard.com/report/github.com/butlerdotdev/cluster-api-control-plane-provider-steward"><img src="https://goreportcard.com/badge/github.com/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Go Report Card"></a>
-  <a href="https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/releases"><img src="https://img.shields.io/github/v/release/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Release"></a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/butlerdotdev/butler/main/assets/mascots/steward.png" alt="Steward" width="150"/>
 </p>
 
-The Steward Control Plane Provider is a [Cluster API](https://cluster-api.sigs.k8s.io/) implementation that bridges CAPI with [Steward](https://github.com/butlerdotdev/steward) hosted control planes.
+<h1 align="center">CAPI Steward</h1>
+
+<p align="center">
+  Cluster API control plane provider for <a href="https://github.com/butlerdotdev/steward">Steward</a> hosted control planes.
+</p>
+
+<p align="center">
+  <a href="https://github.com/butlerdotdev/cluster-api-control-plane-provider-steward/releases"><img src="https://img.shields.io/github/v/release/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/butlerdotdev/cluster-api-control-plane-provider-steward" alt="License"></a>
+  <img src="https://img.shields.io/github/go-mod/go-version/butlerdotdev/cluster-api-control-plane-provider-steward" alt="Go Version">
+</p>
+
+<p align="center">
+  <a href="https://github.com/butlerdotdev/butler">Butler</a> · <a href="https://github.com/butlerdotdev/steward">Steward</a> · <a href="https://docs.butlerlabs.dev">Docs</a> · <a href="https://butlerlabs.dev">Website</a>
+</p>
+
+---
 
 ## What is This?
 
